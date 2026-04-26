@@ -6,7 +6,6 @@
   <title>Musik – Cea Mai Tare Experiență Muzicală</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
-  <link rel="shortcut icon" href="../images/favicon.svg" type="image/x-icon">
 </head>
 <body>
 
@@ -219,7 +218,7 @@
         <span class="logo">Musik.</span>
         <h3>Contactează-ne</h3>
         <p>Suntem aici pentru orice întrebare sau colaborare. Nu ezita să ne scrii oricând!</p>
-        <div class="fci"><div class="fcico">📞</div>+40 123 456 789</div>
+        <div class="fci"><div class="fcico">📞</div>+373 000 000</div>
         <div class="fci"><div class="fcico">✉️</div>contact@musik.ro</div>
         <div class="fci"><div class="fcico">📍</div>București, România</div>
       </div>
@@ -231,108 +230,96 @@
       </div>
     </div>
     <div class="fright">
-      <!-- Tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchTab('login', this)">Login</button>
-        <button class="auth-tab" onclick="switchTab('signup', this)">Sign Up</button>
-      </div>
 
-      <!-- LOGIN FORM -->
-      <div class="auth-form" id="tab-login">
-        <div class="auth-header">
-          <span class="auth-label">Form</span>
-          <h3 class="auth-title">Login</h3>
-        </div>
-        <div class="save-indicator" id="save-indicator-login">
-          <div class="save-dot"></div>
-          <span id="save-text-login">Datele nu sunt salvate încă</span>
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Name</label>
-          <input id="l-name" class="auth-inp" type="text" placeholder="Numele tău" autocomplete="name">
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Email</label>
-          <input id="l-email" class="auth-inp" type="email" placeholder="email@exemplu.com" autocomplete="email">
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Number</label>
-          <input id="l-phone" class="auth-inp" type="tel" placeholder="+40 000 000 000" autocomplete="tel">
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Password</label>
-          <div class="pw-wrap">
-            <input id="l-pass" class="auth-inp" type="password" placeholder="••••••••" autocomplete="current-password">
-            <button class="pw-toggle" type="button" onclick="togglePw('l-pass', this)" aria-label="Arată parola">👁</button>
-          </div>
-        </div>
-        <button class="btn-auth" id="btn-login" onclick="handleLogin(this)">Login</button>
-        <p class="auth-switch">Nu ai cont? <a href="#" onclick="switchTab('signup', document.querySelector('.auth-tab:last-child'));return false;">Înregistrează-te</a></p>
-      </div>
-
-      <!-- SIGNUP FORM -->
-      <div class="auth-form hidden" id="tab-signup">
-        <div class="auth-header">
-          <span class="auth-label">Form</span>
-          <h3 class="auth-title">Sign Up</h3>
-        </div>
-        <div class="save-indicator" id="save-indicator-signup">
-          <div class="save-dot"></div>
-          <span id="save-text-signup">Datele nu sunt salvate încă</span>
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Name</label>
-          <input id="s-name" class="auth-inp" type="text" placeholder="Numele tău complet" autocomplete="name">
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Email</label>
-          <input id="s-email" class="auth-inp" type="email" placeholder="email@exemplu.com" autocomplete="email">
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Number</label>
-          <input id="s-phone" class="auth-inp" type="tel" placeholder="+40 000 000 000" autocomplete="tel">
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Password</label>
-          <div class="pw-wrap">
-            <input id="s-pass" class="auth-inp" type="password" placeholder="••••••••" autocomplete="new-password">
-            <button class="pw-toggle" type="button" onclick="togglePw('s-pass', this)" aria-label="Arată parola">👁</button>
-          </div>
-        </div>
-        <div class="auth-field">
-          <label class="auth-lbl">Confirmă Parola</label>
-          <div class="pw-wrap">
-            <input id="s-pass2" class="auth-inp" type="password" placeholder="••••••••" autocomplete="new-password">
-            <button class="pw-toggle" type="button" onclick="togglePw('s-pass2', this)" aria-label="Arată parola">👁</button>
-          </div>
-        </div>
-        <button class="btn-auth" id="btn-signup" onclick="handleSignup(this)">Creează Cont</button>
-        <p class="auth-switch">Ai deja cont? <a href="#" onclick="switchTab('login', document.querySelector('.auth-tab'));return false;">Autentifică-te</a></p>
-      </div>
-
-      <!-- SUCCESS STATE -->
-      <div class="auth-form hidden auth-success" id="tab-success">
-        <div class="success-icon">✓</div>
-        <h3 id="success-title">Autentificat cu succes!</h3>
-        <p id="success-msg">Bine ai venit în comunitatea Musik.</p>
-        <button class="btn-auth" onclick="handleLogout()">Deconectează-te</button>
-      </div>
-    </div>
+  <!-- Tabs -->
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="switchTab('login', this)">Login</button>
+    <button class="auth-tab" onclick="switchTab('signup', this)">Sign Up</button>
   </div>
-  <div class="fbot">
-    <div class="logo" style="font-size:1.4rem">Musik.</div>
-    <ul class="fnav">
-      <li><a href="#">Acasă</a></li>
-      <li><a href="#artists">Artiști</a></li>
-      <li><a href="#pricing">Prețuri</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-    <div class="socs">
-      <a class="soc" href="#">f</a>
-      <a class="soc" href="#">𝕏</a>
-      <a class="soc" href="#">in</a>
-      <a class="soc" href="#">▶</a>
+
+  <!-- LOGIN -->
+  <div class="auth-form" id="tab-login">
+    <div class="auth-header">
+      <span class="auth-label">Form</span>
+      <h3 class="auth-title">Login</h3>
     </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Name</label>
+      <input id="l-name" class="auth-inp" type="text" placeholder="Numele tău" required>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Email</label>
+      <input id="l-email" class="auth-inp" type="email" placeholder="email@exemplu.com" required>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Telefon</label>
+      <input id="l-phone" class="auth-inp" type="tel" placeholder="060000000" pattern="[0-9]+" required>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Parolă</label>
+      <div class="pw-wrap">
+        <input id="l-pass" class="auth-inp" type="password" minlength="8" placeholder="••••••••" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('l-pass', this)">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-auth" onclick="handleLogin(this)">Login</button>
+  </div>
+
+  <!-- SIGN UP -->
+  <div class="auth-form hidden" id="tab-signup">
+    <div class="auth-header">
+      <span class="auth-label">Form</span>
+      <h3 class="auth-title">Sign Up</h3>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Name</label>
+      <input id="s-name" class="auth-inp" type="text" placeholder="Numele complet" required>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Email</label>
+      <input id="s-email" class="auth-inp" type="email" placeholder="email@exemplu.com" required>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Telefon</label>
+      <input id="s-phone" class="auth-inp" type="tel" placeholder="060000000" pattern="[0-9]+" required>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Parolă</label>
+      <div class="pw-wrap">
+        <input id="s-pass" class="auth-inp" type="password" minlength="8" placeholder="••••••••" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('s-pass', this)">👁</button>
+      </div>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-lbl">Confirmă Parola</label>
+      <div class="pw-wrap">
+        <input id="s-pass2" class="auth-inp" type="password" minlength="8" placeholder="••••••••" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('s-pass2', this)">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-auth" onclick="handleSignup(this)">Creează Cont</button>
+  </div>
+
+  <!-- SUCCESS + LOGOUT -->
+  <div class="auth-form hidden" id="tab-success">
+    <h3 id="success-title">Succes!</h3>
+    <p id="success-msg">Ești autentificat.</p>
+
+    <button class="btn-auth" onclick="logout()">Logout</button>
+  </div>
+
+</div>
   </div>
 </footer>
 

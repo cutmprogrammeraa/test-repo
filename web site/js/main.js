@@ -258,20 +258,18 @@ sections.forEach(sec => sectionObserver.observe(sec));
    localStorage + feedback vizual
    =========================== */
 
-// ── Câmpuri login ──
 const LOGIN_FIELDS = [
-  { id: 'l-name',  key: 'musik_l_name'  },
+  { id: 'l-name', key: 'musik_l_name' },
   { id: 'l-email', key: 'musik_l_email' },
-  { id: 'l-phone', key: 'musik_l_phone' },
-];
-// ── Câmpuri signup ──
-const SIGNUP_FIELDS = [
-  { id: 's-name',  key: 'musik_s_name'  },
-  { id: 's-email', key: 'musik_s_email' },
-  { id: 's-phone', key: 'musik_s_phone' },
+  { id: 'l-phone', key: 'musik_l_phone' }
 ];
 
-// ── Schimbă tab-ul activ ──
+const SIGNUP_FIELDS = [
+  { id: 's-name', key: 'musik_s_name' },
+  { id: 's-email', key: 'musik_s_email' },
+  { id: 's-phone', key: 'musik_s_phone' }
+];
+
 function switchTab(tab, clickedBtn) {
   document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
   if (clickedBtn) clickedBtn.classList.add('active');
@@ -281,37 +279,64 @@ function switchTab(tab, clickedBtn) {
   document.getElementById('tab-success').classList.add('hidden');
 }
 
-// ── Arată/ascunde parola ──
 function togglePw(inputId, btn) {
   const inp = document.getElementById(inputId);
   if (!inp) return;
+
   const show = inp.type === 'password';
   inp.type = show ? 'text' : 'password';
   btn.textContent = show ? '🙈' : '👁';
-  btn.style.color = show ? 'rgba(132,196,255,.8)' : '';
 }
 
-// ── Validare câmp auth ──
+function setInvalid(el) {
+  el.classList.remove('valid');
+  el.classList.add('invalid');
+}
+
+function setValid(el) {
+  el.classList.remove('invalid');
+  el.classList.add('valid');
+}
+
 function validateAuthField(el) {
   const val = el.value.trim();
-  if (!val) {
-    el.classList.remove('valid'); el.classList.add('invalid'); return false;
+
+  if (val === '') {
+    setInvalid(el);
+    return false;
   }
+
   if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-    el.classList.remove('valid'); el.classList.add('invalid'); return false;
+    setInvalid(el);
+    return false;
   }
-  el.classList.remove('invalid'); el.classList.add('valid'); return true;
+
+  if ((el.id === 'l-phone' || el.id === 's-phone') && !/^\d+$/.test(val)) {
+    setInvalid(el);
+    return false;
+  }
+
+  if ((el.id === 'l-pass' || el.id === 's-pass' || el.id === 's-pass2') && val.length < 8) {
+    setInvalid(el);
+    return false;
+  }
+
+  setValid(el);
+  return true;
 }
 
-// ── Salvare localStorage cu indicator ──
 function saveAuthField(fieldKey, value, indicatorId, textId) {
   localStorage.setItem(fieldKey, value);
+
   const ind = document.getElementById(indicatorId);
   const txt = document.getElementById(textId);
+
   if (ind && txt) {
     ind.classList.add('active');
     txt.textContent = '✓ Date salvate automat';
+
     clearTimeout(window['_st_' + indicatorId]);
+
     window['_st_' + indicatorId] = setTimeout(() => {
       ind.classList.remove('active');
       txt.textContent = 'Date salvate în browser';
@@ -319,11 +344,11 @@ function saveAuthField(fieldKey, value, indicatorId, textId) {
   }
 }
 
-// ── Încarcă date salvate ──
 function loadAuthData() {
   [...LOGIN_FIELDS, ...SIGNUP_FIELDS].forEach(({ id, key }) => {
     const el = document.getElementById(id);
     const saved = localStorage.getItem(key);
+
     if (el && saved) {
       el.value = saved;
       el.classList.add('has-value');
@@ -331,65 +356,90 @@ function loadAuthData() {
   });
 }
 
-// ── Atașează events pe câmpuri ──
 function initAuthFields(fields, indicatorId, textId) {
   fields.forEach(({ id, key }) => {
     const el = document.getElementById(id);
     if (!el) return;
+
     el.addEventListener('input', () => {
       saveAuthField(key, el.value, indicatorId, textId);
       validateAuthField(el);
       el.classList.toggle('has-value', el.value.trim() !== '');
     });
-    el.addEventListener('blur',  () => validateAuthField(el));
+
+    el.addEventListener('blur', () => validateAuthField(el));
     el.addEventListener('focus', () => el.classList.add('focused'));
-    el.addEventListener('blur',  () => el.classList.remove('focused'));
+    el.addEventListener('blur', () => el.classList.remove('focused'));
   });
 }
 
-// ── Verifică dacă utilizatorul e deja logat ──
-function checkLoggedIn() {
-  const user = JSON.parse(localStorage.getItem('musik_user') || 'null');
-  if (user) showSuccess(user.name, user.email, false);
+function saveUserToJson(user) {
+  fetch("http://localhost:3000/save-user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(user)
+  })
+  .then(res => res.json())
+  .then(data => console.log(data.message))
+  .catch(err => console.log("Serverul nu este pornit sau Node.js nu este instalat:", err));
 }
 
-// ── Arată starea de succes ──
+function checkLoggedIn() {
+  const user = JSON.parse(localStorage.getItem('musik_user') || 'null');
+
+  if (user) {
+    showSuccess(user.name, user.email, false);
+  }
+}
+
 function showSuccess(name, email, animate = true) {
   document.getElementById('tab-login').classList.add('hidden');
   document.getElementById('tab-signup').classList.add('hidden');
   document.getElementById('tab-success').classList.remove('hidden');
 
   const title = document.getElementById('success-title');
-  const msg   = document.getElementById('success-msg');
-  const tabs  = document.querySelector('.auth-tabs');
+  const msg = document.getElementById('success-msg');
+  const tabs = document.querySelector('.auth-tabs');
 
-  // Adaugă user badge
   const existing = document.getElementById('user-badge');
   if (existing) existing.remove();
+
   const badge = document.createElement('div');
   badge.id = 'user-badge';
   badge.className = 'user-badge';
+
   badge.innerHTML = `
     <div class="user-avatar">${name.charAt(0).toUpperCase()}</div>
     <div>
       <div class="user-info-name">${name}</div>
       <div class="user-info-email">${email}</div>
-    </div>`;
-  document.getElementById('tab-success').insertBefore(badge, document.getElementById('tab-success').firstChild);
+    </div>
+  `;
+
+  document.getElementById('tab-success').insertBefore(
+    badge,
+    document.getElementById('tab-success').firstChild
+  );
 
   title.textContent = animate ? 'Autentificat cu succes!' : 'Bine ai revenit!';
-  msg.textContent   = 'Bine ai venit în comunitatea Musik, ' + name + '!';
+  msg.textContent = 'Bine ai venit în comunitatea Musik, ' + name + '!';
+
   if (tabs) tabs.style.display = 'none';
 }
 
-// ── LOGIN ──
 function handleLogin(btn) {
-  const nameEl  = document.getElementById('l-name');
+  const nameEl = document.getElementById('l-name');
   const emailEl = document.getElementById('l-email');
-  const passEl  = document.getElementById('l-pass');
+  const phoneEl = document.getElementById('l-phone');
+  const passEl = document.getElementById('l-pass');
 
   let ok = true;
-  [nameEl, emailEl, passEl].forEach(el => { if (!validateAuthField(el)) ok = false; });
+
+  [nameEl, emailEl, phoneEl, passEl].forEach(el => {
+    if (!validateAuthField(el)) ok = false;
+  });
 
   if (!ok) {
     btn.classList.add('shake');
@@ -397,15 +447,23 @@ function handleLogin(btn) {
     return;
   }
 
-  // Verifică dacă există cont înregistrat
   const accounts = JSON.parse(localStorage.getItem('musik_accounts') || '[]');
-  const found = accounts.find(a => a.email === emailEl.value.trim() && a.pass === passEl.value);
+
+  const found = accounts.find(a =>
+    a.email === emailEl.value.trim() &&
+    a.pass === passEl.value
+  );
 
   if (!found && accounts.length > 0) {
     btn.classList.add('error');
     btn.textContent = '✗ Email sau parolă greșită';
     passEl.classList.add('invalid');
-    setTimeout(() => { btn.classList.remove('error'); btn.textContent = 'Login'; }, 2000);
+
+    setTimeout(() => {
+      btn.classList.remove('error');
+      btn.textContent = 'Login';
+    }, 2000);
+
     return;
   }
 
@@ -413,83 +471,115 @@ function handleLogin(btn) {
   btn.textContent = 'Se autentifică...';
 
   setTimeout(() => {
-    const user = found || { name: nameEl.value.trim(), email: emailEl.value.trim() };
+    const user = found || {
+      name: nameEl.value.trim(),
+      email: emailEl.value.trim(),
+      phone: phoneEl.value.trim()
+    };
+
     localStorage.setItem('musik_user', JSON.stringify(user));
-    btn.classList.remove('sending'); btn.classList.add('sent');
+
+    btn.classList.remove('sending');
+    btn.classList.add('sent');
     btn.textContent = '✓ Succes!';
+
     setTimeout(() => showSuccess(user.name, user.email), 500);
   }, 1000);
 }
 
-// ── SIGN UP ──
 function handleSignup(btn) {
-  const nameEl  = document.getElementById('s-name');
+  const nameEl = document.getElementById('s-name');
   const emailEl = document.getElementById('s-email');
-  const passEl  = document.getElementById('s-pass');
+  const phoneEl = document.getElementById('s-phone');
+  const passEl = document.getElementById('s-pass');
   const pass2El = document.getElementById('s-pass2');
 
   let ok = true;
-  [nameEl, emailEl, passEl, pass2El].forEach(el => { if (!validateAuthField(el)) ok = false; });
 
-  // Verifică potrivirea parolelor
+  [nameEl, emailEl, phoneEl, passEl, pass2El].forEach(el => {
+    if (!validateAuthField(el)) ok = false;
+  });
+
   if (passEl.value !== pass2El.value) {
-    pass2El.classList.add('invalid'); pass2El.classList.remove('valid');
+    setInvalid(pass2El);
+
     btn.classList.add('shake');
-    const orig = btn.textContent;
-    btn.textContent = '✗ Parolele nu coincid!';
     btn.classList.add('error');
-    setTimeout(() => { btn.classList.remove('shake', 'error'); btn.textContent = orig; }, 2000);
+    btn.textContent = '✗ Parolele nu coincid!';
+
+    setTimeout(() => {
+      btn.classList.remove('shake', 'error');
+      btn.textContent = 'Creează Cont';
+    }, 2000);
+
     return;
   }
 
-  if (!ok) { btn.classList.add('shake'); setTimeout(() => btn.classList.remove('shake'), 500); return; }
+  if (!ok) {
+    btn.classList.add('shake');
+    setTimeout(() => btn.classList.remove('shake'), 500);
+    return;
+  }
 
   btn.classList.add('sending');
   btn.textContent = 'Se creează contul...';
 
   setTimeout(() => {
-    const user = { name: nameEl.value.trim(), email: emailEl.value.trim(), pass: passEl.value };
-    // Salvează contul
+    const user = {
+      name: nameEl.value.trim(),
+      email: emailEl.value.trim(),
+      phone: phoneEl.value.trim(),
+      pass: passEl.value
+    };
+
     const accounts = JSON.parse(localStorage.getItem('musik_accounts') || '[]');
     accounts.push(user);
+
     localStorage.setItem('musik_accounts', JSON.stringify(accounts));
     localStorage.setItem('musik_user', JSON.stringify(user));
 
-    // Curăță câmpuri signup
+    saveUserToJson(user);
+
     [...SIGNUP_FIELDS, { id: 's-pass' }, { id: 's-pass2' }].forEach(({ id, key }) => {
       const el = document.getElementById(id);
-      if (el) { el.value = ''; el.classList.remove('valid','invalid','has-value'); }
-      if (key) localStorage.removeItem(key);
+
+      if (el) {
+        el.value = '';
+        el.classList.remove('valid', 'invalid', 'has-value');
+      }
+
+      if (key) {
+        localStorage.removeItem(key);
+      }
     });
 
-    btn.classList.remove('sending'); btn.classList.add('sent');
+    btn.classList.remove('sending');
+    btn.classList.add('sent');
     btn.textContent = '✓ Cont creat!';
+
     setTimeout(() => showSuccess(user.name, user.email), 500);
   }, 1200);
 }
 
-// ── LOGOUT ──
-function handleLogout() {
+function logout() {
   localStorage.removeItem('musik_user');
-  document.getElementById('tab-success').classList.add('hidden');
-  const badge = document.getElementById('user-badge');
-  if (badge) badge.remove();
-  const tabs = document.querySelector('.auth-tabs');
-  if (tabs) tabs.style.display = '';
 
-  // Reset butoane
-  const btnL = document.getElementById('btn-login');
-  const btnS = document.getElementById('btn-signup');
-  if (btnL) { btnL.className = 'btn-auth'; btnL.textContent = 'Login'; }
-  if (btnS) { btnS.className = 'btn-auth'; btnS.textContent = 'Creează Cont'; }
+  const tabs = document.querySelector('.auth-tabs');
+  if (tabs) tabs.style.display = 'flex';
 
   switchTab('login', document.querySelector('.auth-tab'));
+
+  const badge = document.getElementById('user-badge');
+  if (badge) badge.remove();
+
+  document.getElementById('tab-success').classList.add('hidden');
+  document.getElementById('tab-login').classList.remove('hidden');
 }
 
-// ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
-  initAuthFields(LOGIN_FIELDS,  'save-indicator-login',  'save-text-login');
-  initAuthFields(SIGNUP_FIELDS, 'save-indicator-signup', 'save-text-signup');
   loadAuthData();
+  initAuthFields(LOGIN_FIELDS, 'save-indicator-login', 'save-text-login');
+  initAuthFields(SIGNUP_FIELDS, 'save-indicator-signup', 'save-text-signup');
   checkLoggedIn();
 });
+
