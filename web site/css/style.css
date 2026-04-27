@@ -13,7 +13,7 @@ body { font-family: 'Raleway', sans-serif; color: white; background: #0d0828; ov
 .ticket-btn { background: white; color: #3d2be8 !important; padding: 17px 32px; border-radius: 8px; }
 .ticket-btn:hover { background: #3d2be8; color: white !important; box-shadow: 0 0 25px rgba(61,43,232,.7); }
 
-.hero { width: 100%; min-height: 100vh; background-image: url("../images/concert-bg.jpg"); background-size: cover; background-position: center; position: relative; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+.hero { width: 100%; min-height: 100vh; background-image: url("../images/fundal.png"); background-size: cover; background-position: center; position: relative; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
 .overlay { position: absolute; inset: 0; background: linear-gradient(rgba(18,10,70,.65), rgba(8,5,25,.82)); z-index: 1; }
 .hero-content { position: relative; z-index: 3; margin-top: 10px; }
 .hero-content h1 { font-family: 'Montserrat', sans-serif; font-size: 58px; line-height: 1.1; font-weight: 900; text-transform: uppercase; color: white; margin-bottom: 40px; text-shadow: 0 0 25px rgba(255,255,255,.25); }
@@ -31,37 +31,196 @@ body { font-family: 'Raleway', sans-serif; color: white; background: #0d0828; ov
 .shape-three { width: 0; height: 0; border-left: 24px solid transparent; border-right: 24px solid transparent; border-bottom: 42px solid rgba(255,79,79,.55); bottom: 22%; left: 10%; }
 @keyframes floatShape { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(-20px) rotate(12deg); } }
 
-.about, .artists, .categories, .reviews, .moments { background: #fff; color: #222; }
-.about { min-height: 700px; display: flex; align-items: center; justify-content: center; gap: 80px; padding: 120px 10%; overflow: hidden; }
-.about-images { width: 520px; height: 480px; position: relative; opacity: 0; transform: translateX(-80px); transition: 1s ease; }
-.about-img { position: absolute; object-fit: cover; border-radius: 22px; box-shadow: 0 25px 60px rgba(0,0,0,.15); }
-.about-img.back { width: 350px; height: 400px; top: 0; left: 30px; opacity: .4; }
-.about-img.front { width: 420px; height: 400px; bottom: 0; right: 0; z-index: 2; }
-.about-text { max-width: 560px; opacity: 0; transform: translateX(80px); transition: 1s ease; }
-.about-text h2, .artists-text h2 { font-family: 'Montserrat', sans-serif; font-size: 42px; font-weight: 900; color: #222; margin-bottom: 28px; }
-.about-text p, .artists-text p { font-size: 16px; line-height: 1.7; color: rgba(35,35,35,.65); }
-.about-text span { color: #3d2be8; font-weight: 800; }
-.about.show .about-images, .about.show .about-text { opacity: 1; transform: translateX(0); }
-.about.show .about-img.front { animation: aboutFloat 3s ease-in-out infinite alternate; }
-@keyframes aboutFloat { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+.about, .artists, .categories, .reviews, .moments { 
+    background: #fff; 
+    color: #222; 
+}
 
-.artists { min-height: 760px; display: flex; align-items: center; justify-content: center; gap: 110px; padding: 120px 10%; overflow: hidden; }
-.artists-text { width: 430px; opacity: 0; transform: translateX(-80px); transition: 1s ease; }
-.artists-text p { margin-bottom: 55px; }
-.artists-btn { display: inline-block; background: #3d2be8; color: white; text-decoration: none; padding: 20px 34px; border-radius: 8px; font-family: 'Montserrat', sans-serif; font-weight: 800; box-shadow: 0 18px 35px rgba(61,43,232,.35); transition: .3s ease; }
-.artists-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 25px 50px rgba(61,43,232,.45); }
-.artists-gallery { width: 690px; height: 540px; position: relative; opacity: 0; transform: translateX(80px); transition: 1s ease; }
-.artist-img { position: absolute; object-fit: cover; border-radius: 18px; box-shadow: 0 25px 60px rgba(0,0,0,.16); transition: .4s ease; }
-.img-one { width: 310px; height: 210px; top: 85px; left: 40px; }
-.img-two { width: 250px; height: 250px; top: 20px; right: 35px; }
-.img-three { width: 270px; height: 290px; bottom: 20px; left: 40px; }
-.img-four { width: 350px; height: 265px; bottom: 65px; right: 15px; }
-.artist-img:hover { transform: scale(1.06) translateY(-8px); z-index: 10; box-shadow: 0 30px 70px rgba(61,43,232,.22); }
-.artists.show .artists-text, .artists.show .artists-gallery { opacity: 1; transform: translateX(0); }
-.artists.show .img-two, .artists.show .img-three { animation: artistFloat 3s ease-in-out infinite alternate; }
-.artists.show .img-one, .artists.show .img-four { animation: artistFloatTwo 3.5s ease-in-out infinite alternate; }
-@keyframes artistFloat { from { transform: translateY(0); } to { transform: translateY(-12px); } }
-@keyframes artistFloatTwo { from { transform: translateY(0); } to { transform: translateY(10px); } }
+.about { 
+    min-height: 700px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; /* MODIFICAT */
+    gap: 80px; 
+    padding: 120px 10%; 
+    overflow: hidden; 
+}
+
+/* IMAGINI — poziționare îmbunătățită */
+.about-images {
+    width: 50%;
+    max-width: 520px;
+    height: 480px;
+    position: relative;
+    opacity: 0;
+    transform: translateX(-80px);
+    transition: 1s ease;
+}
+
+.about-img {
+    position: absolute;
+    object-fit: cover;
+    border-radius: 22px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.15);
+}
+
+/* imagine din spate */
+.about-img.back {
+    width: 340px;
+    height: 380px;
+    top: 60px;        /* mai jos */
+    left: 0;          /* aliniată pe stânga */
+    opacity: 0.45;
+}
+
+/* imagine principală */
+.about-img.front {
+    width: 420px;
+    height: 420px;
+    top: 0;           /* mai sus */
+    right: 0;
+    z-index: 2;
+}
+
+/* TEXT */
+.about-text { 
+    width: 50%;              /* ADAUGAT */
+    max-width: 560px; 
+    opacity: 0; 
+    transform: translateX(80px); 
+    transition: 1s ease; 
+}
+
+.about-text h2, 
+.artists-text h2 { 
+    font-family: 'Montserrat', sans-serif; 
+    font-size: 42px; 
+    font-weight: 900; 
+    color: #222; 
+    margin-bottom: 28px; 
+}
+
+.about-text p, 
+.artists-text p { 
+    font-size: 16px; 
+    line-height: 1.7; 
+    color: rgba(35,35,35,.65); 
+}
+
+.about-text span { 
+    color: #3d2be8; 
+    font-weight: 800; 
+}
+
+/* ANIMATIE */
+.about.show .about-images, 
+.about.show .about-text { 
+    opacity: 1; 
+    transform: translateX(0); 
+}
+
+.about.show .about-img.front { 
+    animation: aboutFloat 3s ease-in-out infinite alternate; 
+}
+
+@keyframes aboutFloat { 
+    from { transform: translateY(0); } 
+    to { transform: translateY(-12px); } 
+}
+
+/* ===== ARTISTS ===== */
+
+.artists { 
+    min-height: 760px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 110px; 
+    padding: 120px 10%; 
+    overflow: hidden; 
+}
+
+/* TEXT */
+.artists-text { 
+    width: 430px; 
+    opacity: 0; 
+    transform: translateX(-80px); 
+    transition: 1s ease; 
+}
+
+.artists-text p { 
+    margin-bottom: 55px; 
+}
+
+.artists-btn { 
+    display: inline-block; 
+    background: #3d2be8; 
+    color: white; 
+    text-decoration: none; 
+    padding: 20px 34px; 
+    border-radius: 8px; 
+    font-family: 'Montserrat', sans-serif; 
+    font-weight: 800; 
+    box-shadow: 0 18px 35px rgba(61,43,232,.35); 
+    transition: .3s ease; 
+}
+
+.artists-btn:hover { 
+    transform: translateY(-5px) scale(1.05); 
+    box-shadow: 0 25px 50px rgba(61,43,232,.45); 
+}
+
+/* ===== GALERIE (fix machet) ===== */
+
+.artists-gallery { 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    width: 690px;
+    opacity: 0;
+    transform: translateX(80px);
+    transition: 1s ease;
+}
+
+/* IMAGINI */
+.artist-img { 
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.16);
+    transition: .4s ease;
+}
+
+/* OFFSET EXACT CA ÎN MACHET */
+.artists-gallery img:nth-child(1) {
+    transform: translateY(30px);
+}
+
+.artists-gallery img:nth-child(2) {
+    transform: translateY(-30px);
+}
+
+.artists-gallery img:nth-child(3) {
+    transform: translateY(15px);
+}
+
+.artists-gallery img:nth-child(4) {
+    transform: translateY(-15px);
+}
+
+/* HOVER */
+.artist-img:hover { 
+    transform: scale(1.05);
+    box-shadow: 0 30px 70px rgba(61,43,232,.22); 
+}
+
+/* ANIMAȚIE LA SCROLL */
+.artists.show .artists-text, 
+.artists.show .artists-gallery { 
+    opacity: 1; 
+    transform: translateX(0); 
+}
 
 .categories { padding: 120px 0 90px; overflow: hidden; }
 .categories h2 { font-family: 'Montserrat', sans-serif; font-size: 34px; font-weight: 900; text-align: center; color: #202020; margin-bottom: 60px; }
@@ -123,22 +282,127 @@ body { font-family: 'Raleway', sans-serif; color: white; background: #0d0828; ov
 @keyframes drawCheck { from { opacity: 0; transform: scale(0) rotate(-25deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
 @keyframes modalShow { from { opacity: 0; transform: translateY(40px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-.moments { padding: 120px 8%; background: #fff; color: #222; overflow: hidden; }
-.moments-header { text-align: center; margin-bottom: 55px; opacity: 0; transform: translateY(50px); transition: 1s ease; }
-.moments.show .moments-header { opacity: 1; transform: translateY(0); }
-.moments-header h2 { font-family: 'Montserrat', sans-serif; font-size: 40px; font-weight: 900; }
-.moments-header h2 span { color: #3d2be8; }
-.moments-header p { color: rgba(35,35,35,.65); margin-top: 12px; }
-.moments-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; }
-.moment-item { height: 240px; border-radius: 24px; overflow: hidden; position: relative; opacity: 0; transform: translateY(60px); transition: .9s ease; }
-.moments.show .moment-item { opacity: 1; transform: translateY(0); }
-.moment-item.big { grid-row: span 2; height: 500px; }
-.moment-item img { width: 100%; height: 100%; object-fit: cover; transition: .5s; }
-.moment-item:hover img { transform: scale(1.09); }
-.moment-overlay { position: absolute; inset: 0; background: linear-gradient(transparent, rgba(0,0,0,.75)); display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; color: white; opacity: 0; transition: .3s; }
-.moment-item:hover .moment-overlay { opacity: 1; }
-.moment-tag { font-weight: 900; font-family: 'Montserrat', sans-serif; }
-.moment-stats { margin-top: 8px; color: rgba(255,255,255,.75); }
+/* ===== MOMENTS ===== */
+
+.moments { 
+    padding: 120px 8%; 
+    background: #fff; 
+    color: #222; 
+    overflow: hidden; 
+}
+
+/* HEADER */
+.moments-header { 
+    text-align: center; 
+    margin-bottom: 55px; 
+    opacity: 0; 
+    transform: translateY(50px); 
+    transition: 1s ease; 
+}
+
+.moments.show .moments-header { 
+    opacity: 1; 
+    transform: translateY(0); 
+}
+
+.moments-header h2 { 
+    font-family: 'Montserrat', sans-serif; 
+    font-size: 40px; 
+    font-weight: 900; 
+}
+
+.moments-header h2 span { 
+    color: #3d2be8; 
+}
+
+.moments-header p { 
+    color: rgba(35,35,35,.65); 
+    margin-top: 12px; 
+}
+
+/* 🔥 GRID → FLEX (fix principal) */
+.moments-grid { 
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;        /* scroll lateral */
+    scroll-behavior: smooth;
+    padding-bottom: 10px;
+}
+
+/* elemente */
+.moment-item { 
+    min-width: 280px;        /* IMPORTANT */
+    height: 240px; 
+    border-radius: 24px; 
+    overflow: hidden; 
+    position: relative; 
+    flex-shrink: 0;
+
+    opacity: 0; 
+    transform: translateY(60px); 
+    transition: .9s ease; 
+}
+
+.moments.show .moment-item { 
+    opacity: 1; 
+    transform: translateY(0); 
+}
+
+/* ❌ eliminăm layout mare */
+.moment-item.big { 
+    height: 240px; 
+}
+
+/* imagine */
+.moment-item img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    transition: .5s; 
+}
+
+.moment-item:hover img { 
+    transform: scale(1.09); 
+}
+
+/* overlay */
+.moment-overlay { 
+    position: absolute; 
+    inset: 0; 
+    background: linear-gradient(transparent, rgba(0,0,0,.75)); 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-end; 
+    padding: 24px; 
+    color: white; 
+    opacity: 0; 
+    transition: .3s; 
+}
+
+.moment-item:hover .moment-overlay { 
+    opacity: 1; 
+}
+
+/* text */
+.moment-tag { 
+    font-weight: 900; 
+    font-family: 'Montserrat', sans-serif; 
+}
+
+.moment-stats { 
+    margin-top: 8px; 
+    color: rgba(255,255,255,.75); 
+}
+
+/* 💎 scrollbar frumos */
+.moments-grid::-webkit-scrollbar {
+    height: 6px;
+}
+
+.moments-grid::-webkit-scrollbar-thumb {
+    background: #3d2be8;
+    border-radius: 10px;
+}
 
 .footer { background: #222; color: white; }
 .footer-main { display: grid; grid-template-columns: 1fr 1fr; }

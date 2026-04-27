@@ -171,8 +171,8 @@ if (categoryWrapper && originalCards.length > 0) {
 const reviews = [
     {
         name: "Daniel Pop",
-        img: "images/review-1.jpg",
-        text: "Ca artist, am participat atât ca performer cât și ca spectator. Nivelul tehnic și profesionalismul echipei Musik nu au egal în industrie.",
+        img: "../images/rusu.png",
+        text: "Am găsit biletele foarte ușor și tot procesul a fost rapid. Concertul a fost minunat, iar atmosfera exact cum mi-am dorit.",
         likes: 18,
         dislikes: 1,
         date: 1,
@@ -180,7 +180,7 @@ const reviews = [
     },
     {
         name: "Maria Ionescu",
-        img: "images/review-2.jpg",
+        img: "../images/ionescu.png",
         text: "Tot procesul a fost rapid, iar concertul a fost minunat. Atmosfera a fost exact cum mi-am dorit.",
         likes: 9,
         dislikes: 0,
@@ -189,7 +189,7 @@ const reviews = [
     },
     {
         name: "Elena Marinescu",
-        img: "images/review-3.jpg",
+        img: "../images/marinescu.png",
         text: "O platformă simplă și eficientă. Mi-a plăcut cât de repede am putut găsi evenimentul dorit.",
         likes: 15,
         dislikes: 2,
@@ -231,7 +231,7 @@ function renderReviews() {
             <div class="quote right-quote">”</div>
 
             <div class="review-user">
-                <img src="${review.img}" alt="${review.name}">
+                <img src="${review.img || '../images/icon.png'}" alt="${review.name}">
                 <h3>${review.name}</h3>
             </div>
 
@@ -403,7 +403,7 @@ if (modalSubmit) {
 
         currentReviews.unshift({
             name: name,
-            img: "images/review-default.jpg",
+            img: "../images/icon.png",
             text: message,
             likes: 0,
             dislikes: 0,
@@ -479,214 +479,237 @@ showMoments();
 
 /* ===========================
    AUTH — Login / Sign Up
-   localStorage + feedback vizual
-   =========================== */
+=========================== */
 
-const AUTH_LOGIN_FIELDS  = [
-    { id: "l-name",  key: "musik_l_name"  },
-    { id: "l-email", key: "musik_l_email" },
-    { id: "l-phone", key: "musik_l_phone" }
-];
-
-const AUTH_SIGNUP_FIELDS = [
-    { id: "s-name",  key: "musik_s_name"  },
-    { id: "s-email", key: "musik_s_email" },
-    { id: "s-phone", key: "musik_s_phone" }
-];
-
-/* Comută tab-ul activ */
 function authSwitch(tab, clickedBtn) {
-    document.querySelectorAll(".auth-tab").forEach(function(b) { b.classList.remove("active"); });
-    if (clickedBtn) clickedBtn.classList.add("active");
-
-    document.getElementById("auth-login").classList.toggle("hidden",   tab !== "login");
-    document.getElementById("auth-signup").classList.toggle("hidden",  tab !== "signup");
+    document.getElementById("auth-login").classList.toggle("hidden", tab !== "login");
+    document.getElementById("auth-register").classList.toggle("hidden", tab !== "register");
     document.getElementById("auth-success").classList.add("hidden");
+
+    document.querySelectorAll(".auth-tab").forEach(function(btn) {
+        btn.classList.remove("active");
+    });
+
+    if (clickedBtn) clickedBtn.classList.add("active");
 }
 
-/* Arată/ascunde parolă */
 function toggleEye(inputId, btn) {
-    var inp = document.getElementById(inputId);
+    const inp = document.getElementById(inputId);
     if (!inp) return;
-    var show = inp.type === "password";
-    inp.type = show ? "text" : "password";
-    btn.textContent = show ? "🙈" : "👁";
+
+    if (inp.type === "password") {
+        inp.type = "text";
+        btn.textContent = "🙈";
+    } else {
+        inp.type = "password";
+        btn.textContent = "👁";
+    }
 }
 
-/* Validare câmp */
 function validateAinp(el) {
-    var val = el.value.trim();
-    if (!val) { el.classList.remove("valid"); el.classList.add("invalid"); return false; }
-    if (el.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-        el.classList.remove("valid"); el.classList.add("invalid"); return false;
+    if (!el) return false;
+
+    const val = el.value.trim();
+
+    if (val === "") {
+        el.classList.remove("valid");
+        el.classList.add("invalid");
+        return false;
     }
-    el.classList.remove("invalid"); el.classList.add("valid"); return true;
+
+    if (el.type === "email") {
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+        if (!emailOk) {
+            el.classList.remove("valid");
+            el.classList.add("invalid");
+            return false;
+        }
+    }
+
+    if (el.id === "r-telefon") {
+        const phoneOk = /^\+373 \d{2} \d{3} \d{3}$/.test(val);
+        if (!phoneOk) {
+            el.classList.remove("valid");
+            el.classList.add("invalid");
+            return false;
+        }
+    }
+
+    if (el.id === "r-pass" && val.length < 8) {
+        el.classList.remove("valid");
+        el.classList.add("invalid");
+        return false;
+    }
+
+    el.classList.remove("invalid");
+    el.classList.add("valid");
+    return true;
 }
 
-/* Salvare localStorage + indicator */
-function saveAinp(key, value, siId, siTxtId) {
-    localStorage.setItem(key, value);
-    var ind = document.getElementById(siId);
-    var txt = document.getElementById(siTxtId);
-    if (!ind || !txt) return;
-    ind.classList.add("active");
-    txt.textContent = "✓ Salvat automat";
-    clearTimeout(window["_si_" + siId]);
-    window["_si_" + siId] = setTimeout(function() {
-        ind.classList.remove("active");
-        txt.textContent = "Date salvate în browser";
-    }, 1800);
-}
-
-/* Încarcă date din localStorage */
-function loadAuthData() {
-    AUTH_LOGIN_FIELDS.concat(AUTH_SIGNUP_FIELDS).forEach(function(f) {
-        var el = document.getElementById(f.id);
-        var saved = localStorage.getItem(f.key);
-        if (el && saved) { el.value = saved; el.classList.add("has-val"); }
-    });
-}
-
-/* Atașează events pe câmpuri */
-function initAuthInputs(fields, siId, siTxtId) {
-    fields.forEach(function(f) {
-        var el = document.getElementById(f.id);
-        if (!el) return;
-        el.addEventListener("input", function() {
-            saveAinp(f.key, el.value, siId, siTxtId);
-            validateAinp(el);
-            el.classList.toggle("has-val", el.value.trim() !== "");
-        });
-        el.addEventListener("blur", function() { validateAinp(el); });
-    });
-}
-
-/* Afișează success state */
-function showAuthSuccess(name, email, msg) {
+function showAuthSuccess(name, email, msg = "Bine ai venit!") {
     document.getElementById("auth-login").classList.add("hidden");
-    document.getElementById("auth-signup").classList.add("hidden");
+    document.getElementById("auth-register").classList.add("hidden");
     document.getElementById("auth-success").classList.remove("hidden");
-    document.querySelectorAll(".auth-tab").forEach(function(t) { t.style.display = "none"; });
 
-    document.getElementById("auth-success-title").textContent = msg || "Autentificat!";
-    document.getElementById("auth-success-msg").textContent = "Bine ai venit, " + name + "!";
+    document.getElementById("auth-success-title").textContent = "Succes!";
+    document.getElementById("auth-success-msg").textContent = msg;
 
-    var badge = document.getElementById("auth-user-badge");
-    badge.innerHTML =
-        '<div class="auth-user-av">' + name.charAt(0).toUpperCase() + "</div>" +
-        '<div><div class="auth-user-name">' + name + "</div>" +
-        '<div class="auth-user-email">' + email + "</div></div>";
+    document.getElementById("auth-user-badge").innerHTML = `
+        <div class="auth-user-av">${name.charAt(0).toUpperCase()}</div>
+        <div>
+            <div class="auth-user-name">${name}</div>
+            <div class="auth-user-email">${email}</div>
+        </div>
+    `;
 }
 
-/* Verifică dacă e logat */
-function checkAuthLoggedIn() {
-    var user = JSON.parse(localStorage.getItem("musik_user") || "null");
-    if (user) showAuthSuccess(user.name, user.email, "Bine ai revenit!");
-}
+function doRegister(btn) {
+    const numeEl = document.getElementById("r-nume");
+    const prenumeEl = document.getElementById("r-prenume");
+    const emailEl = document.getElementById("r-email");
+    const telefonEl = document.getElementById("r-telefon");
+    const passEl = document.getElementById("r-pass");
+    const pass2El = document.getElementById("r-pass2");
 
-/* LOGIN */
-function doLogin(btn) {
-    var nameEl  = document.getElementById("l-name");
-    var emailEl = document.getElementById("l-email");
-    var passEl  = document.getElementById("l-pass");
-    var ok = true;
-    [nameEl, emailEl, passEl].forEach(function(el) { if (!validateAinp(el)) ok = false; });
+    let ok = true;
 
-    if (!ok) { btn.classList.add("shake"); setTimeout(function() { btn.classList.remove("shake"); }, 500); return; }
-
-    var accounts = JSON.parse(localStorage.getItem("musik_accounts") || "[]");
-    var found = null;
-    accounts.forEach(function(a) { if (a.email === emailEl.value.trim() && a.pass === passEl.value) found = a; });
-
-    if (!found && accounts.length > 0) {
-        btn.classList.add("err"); btn.textContent = "✗ Date incorecte";
-        passEl.classList.add("invalid");
-        setTimeout(function() { btn.classList.remove("err"); btn.textContent = "Login"; }, 2200);
-        return;
-    }
-
-    btn.classList.add("sending"); btn.textContent = "Se autentifică...";
-    setTimeout(function() {
-        var user = found || { name: nameEl.value.trim(), email: emailEl.value.trim() };
-        localStorage.setItem("musik_user", JSON.stringify(user));
-        btn.classList.remove("sending"); btn.classList.add("sent"); btn.textContent = "✓ Succes!";
-        setTimeout(function() { showAuthSuccess(user.name, user.email); }, 550);
-    }, 1000);
-}
-
-/* SIGN UP */
-function doSignup(btn) {
-    var nameEl  = document.getElementById("s-name");
-    var emailEl = document.getElementById("s-email");
-    var passEl  = document.getElementById("s-pass");
-    var pass2El = document.getElementById("s-pass2");
-    var ok = true;
-    [nameEl, emailEl, passEl, pass2El].forEach(function(el) { if (!validateAinp(el)) ok = false; });
+    [numeEl, prenumeEl, emailEl, telefonEl, passEl, pass2El].forEach(function(el) {
+        if (!validateAinp(el)) ok = false;
+    });
 
     if (passEl.value !== pass2El.value) {
         pass2El.classList.add("invalid");
-        btn.classList.add("err", "shake");
-        var orig = btn.textContent; btn.textContent = "✗ Parolele nu coincid!";
-        setTimeout(function() { btn.classList.remove("err", "shake"); btn.textContent = orig; }, 2200);
+        btn.textContent = "✗ Parolele nu coincid";
+        setTimeout(function() {
+            btn.textContent = "Creează Cont";
+        }, 2000);
         return;
     }
 
-    if (!ok) { btn.classList.add("shake"); setTimeout(function() { btn.classList.remove("shake"); }, 500); return; }
+    if (!ok) return;
 
-    btn.classList.add("sending"); btn.textContent = "Se creează contul...";
+    const user = {
+        name: numeEl.value.trim() + " " + prenumeEl.value.trim(),
+        email: emailEl.value.trim(),
+        telefon: telefonEl.value.trim(),
+        pass: passEl.value
+    };
+
+    let accounts = JSON.parse(localStorage.getItem("musik_accounts") || "[]");
+
+    const exists = accounts.some(function(account) {
+        return account.email === user.email;
+    });
+
+    if (exists) {
+        btn.textContent = "✗ Email deja folosit";
+        setTimeout(function() {
+            btn.textContent = "Creează Cont";
+        }, 2000);
+        return;
+    }
+
+    accounts.push(user);
+    localStorage.setItem("musik_accounts", JSON.stringify(accounts));
+    localStorage.setItem("musik_user", JSON.stringify(user));
+
+    accounts.forEach(function(user) {
+        console.log("User:", user.name, user.email);
+    });
+
+    fetch("http://localhost:3000/save-user", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+    })
+    .then(function(res) {
+        return res.json();
+    })
+    .then(function(data) {
+        console.log("Salvat în data.json:", data);
+    })
+    .catch(function(err) {
+        console.log("Eroare server:", err);
+    });
+
+    btn.textContent = "✓ Cont creat!";
+    btn.classList.add("sent");
+
     setTimeout(function() {
-        var user = { name: nameEl.value.trim(), email: emailEl.value.trim(), pass: passEl.value };
-        var accounts = JSON.parse(localStorage.getItem("musik_accounts") || "[]");
-        accounts.push(user); localStorage.setItem("musik_accounts", JSON.stringify(accounts));
-        localStorage.setItem("musik_user", JSON.stringify(user));
-
-        fetch("/save-user", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(user)
-})
-.then(function(response) {
-    return response.json();
-})
-.then(function(data) {
-    console.log("Trimis la server:", data);
-})
-.catch(function(error) {
-    console.log("Eroare la salvare:", error);
-});
-
-        AUTH_SIGNUP_FIELDS.forEach(function(f) {
-            var el = document.getElementById(f.id);
-            if (el) { el.value = ""; el.classList.remove("valid","invalid","has-val"); }
-            localStorage.removeItem(f.key);
-        });
-        ["s-pass","s-pass2"].forEach(function(id) {
-            var el = document.getElementById(id); if (el) el.value = "";
-        });
-
-        btn.classList.remove("sending"); btn.classList.add("sent"); btn.textContent = "✓ Cont creat!";
-        setTimeout(function() { showAuthSuccess(user.name, user.email, "Cont creat cu succes!"); }, 550);
-    }, 1200);
+        showAuthSuccess(user.name, user.email, "Cont creat cu succes!");
+    }, 500);
 }
 
-/* LOGOUT */
+function doLogin(btn) {
+    const emailEl = document.getElementById("l-email");
+    const passEl = document.getElementById("l-pass");
+
+    let ok = true;
+
+    [emailEl, passEl].forEach(function(el) {
+        if (!validateAinp(el)) ok = false;
+    });
+
+    if (!ok) return;
+
+    const accounts = JSON.parse(localStorage.getItem("musik_accounts") || "[]");
+
+    const found = accounts.find(function(account) {
+        return account.email === emailEl.value.trim() &&
+               account.pass === passEl.value;
+    });
+
+    if (!found) {
+        btn.textContent = "✗ Date incorecte";
+        btn.classList.add("err");
+
+        setTimeout(function() {
+            btn.textContent = "Login";
+            btn.classList.remove("err");
+        }, 2000);
+
+        return;
+    }
+
+    localStorage.setItem("musik_user", JSON.stringify(found));
+
+    btn.textContent = "✓ Succes!";
+    btn.classList.add("sent");
+
+    setTimeout(function() {
+        showAuthSuccess(found.name, found.email, "Autentificat cu succes!");
+    }, 500);
+}
+
 function doLogout() {
     localStorage.removeItem("musik_user");
     document.getElementById("auth-success").classList.add("hidden");
-    document.querySelectorAll(".auth-tab").forEach(function(t) { t.style.display = ""; });
-    var btnL = document.getElementById("btn-login");
-    var btnS = document.getElementById("btn-signup");
-    if (btnL) { btnL.className = "auth-btn"; btnL.textContent = "Login"; }
-    if (btnS) { btnS.className = "auth-btn"; btnS.textContent = "Creează Cont"; }
-    authSwitch("login", document.querySelector(".auth-tab"));
+    authSwitch("login", document.querySelectorAll(".auth-tab")[0]);
 }
 
-/* INIT */
-document.addEventListener("DOMContentLoaded", function() {
-    initAuthInputs(AUTH_LOGIN_FIELDS,  "si-login",  "si-login-txt");
-    initAuthInputs(AUTH_SIGNUP_FIELDS, "si-signup", "si-signup-txt");
-    loadAuthData();
-    checkAuthLoggedIn();
-});
+/* Telefon Moldova auto-format: +373 60 000 000 */
+const telInput = document.getElementById("r-telefon");
+
+if (telInput) {
+    telInput.value = "+373 ";
+
+    telInput.addEventListener("input", function() {
+        let digits = this.value.replace(/\D/g, "");
+
+        if (digits.startsWith("373")) {
+            digits = digits.slice(3);
+        }
+
+        digits = digits.slice(0, 8);
+
+        let formatted = "+373 ";
+
+        if (digits.length > 0) formatted += digits.substring(0, 2);
+        if (digits.length > 2) formatted += " " + digits.substring(2, 5);
+        if (digits.length > 5) formatted += " " + digits.substring(5, 8);
+
+        this.value = formatted;
+    });
+}

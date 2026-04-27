@@ -3,22 +3,22 @@ const categoryData = {
         {
             name: "Carla’s Dreams",
             date: "6 - 7 aprilie 21:00 - 23:45",
-            img: "images/pop-1.jpg"
+            img: "../images/carlas.jpg"
         },
         {
             name: "Irina Rimes",
             date: "26 aprilie 20:00 - 21:45",
-            img: "images/pop-2.jpg"
+            img: "../images/rimes.jpg"
         },
         {
             name: "Ionel Istrati",
             date: "19 mai 16:00 - 19:00",
-            img: "images/pop-3.jpg"
+            img: "../images/istrati.jpg"
         },
         {
             name: "Cleopatra Stratan",
             date: "16 iunie 19:00 - 21:45",
-            img: "images/pop-4.jpg"
+            img: "../images/stratan.jpg"
         }
     ],
 

@@ -3,36 +3,29 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname)); // 🔥 IMPORTANT
 
-app.post("/save-user", function(req, res) {
-    const filePath = path.join(__dirname, "data.json");
+const filePath = path.join(__dirname, "data.json");
 
-    let users = [];
+app.post("/save-user", (req, res) => {
+    const user = req.body;
+
+    let data = { users: [] };
 
     if (fs.existsSync(filePath)) {
-        const fileData = fs.readFileSync(filePath, "utf8");
-
-        if (fileData.trim() !== "") {
-            users = JSON.parse(fileData);
-        }
+        const file = fs.readFileSync(filePath, "utf8");
+        if (file) data = JSON.parse(file);
     }
 
-    users.push(req.body);
+    data.users.push(user);
 
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 
-    console.log("Date salvate:", req.body);
-
-    res.json({
-        success: true,
-        message: "Date salvate în data.json"
-    });
+    res.json({ status: "ok" });
 });
 
-app.listen(PORT, function() {
-    console.log("Server pornit: http://localhost:" + PORT);
+app.listen(3000, () => {
+    console.log("Server pornit: http://localhost:3000");
 });

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Musik</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* =============================================
+           CONCERTE SECTION (date din data.json)
+        ============================================= */
+        .concerte {
+            background: #fff;
+            padding: 120px 8% 100px;
+            color: #222;
+        }
+        .concerte-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .concerte-header h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 36px; font-weight: 900; color: #202020;
+            margin-bottom: 14px;
+        }
+        .concerte-header h2 span { color: #3d2be8; }
+        .concerte-header p { color: rgba(35,35,35,.6); font-size: 16px; }
+
+        /* Filter buttons */
+        .concerte-filters {
+            display: flex; justify-content: center;
+            gap: 12px; flex-wrap: wrap; margin-bottom: 50px;
+        }
+        .filter-btn {
+            background: #f4f4f8; border: 2px solid transparent;
+            color: #555; font-family: 'Montserrat', sans-serif;
+            font-size: 13px; font-weight: 800; padding: 10px 22px;
+            border-radius: 30px; cursor: pointer; transition: .25s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: #3d2be8; color: white;
+            border-color: #3d2be8;
+            box-shadow: 0 6px 20px rgba(61,43,232,.3);
+        }
+
+        /* Cards grid */
+        .concerte-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 28px;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .concert-card {
+            background: white; border-radius: 18px; overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,.09);
+            transition: transform .35s cubic-bezier(0.22,1,0.36,1), box-shadow .35s ease;
+            opacity: 0; transform: translateY(30px);
+            animation: cardIn .55s ease forwards;
+        }
+        .concert-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 22px 55px rgba(61,43,232,.18);
+        }
+        @keyframes cardIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .concert-img {
+            width: 100%; height: 210px;
+            object-fit: cover; object-position: center top;
+            display: block; background: #eee;
+        }
+        /* Fallback gradient when image missing */
+        .concert-img-wrap {
+            position: relative; height: 210px; overflow: hidden;
+            background: linear-gradient(135deg, #3d2be8 0%, #ff4f4f 100%);
+        }
+        .concert-img-wrap img {
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: center top;
+        }
+        .concert-badge {
+            position: absolute; top: 14px; left: 14px;
+            background: #3d2be8; color: white;
+            font-family: 'Montserrat', sans-serif; font-size: 10px;
+            font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 20px;
+        }
+        .concert-badge.pop    { background: #e58b19; }
+        .concert-badge.rock   { background: #ef5350; }
+        .concert-badge.folk   { background: #ff4f4f; }
+        .concert-badge.instrumental { background: #3d2be8; }
+        .concert-badge.jazz   { background: #ab47bc; }
+
+        .concert-body { padding: 20px 22px 24px; }
+        .concert-body h3 {
+            font-family: 'Montserrat', sans-serif; font-size: 19px;
+            font-weight: 900; color: #111; margin-bottom: 10px;
+        }
+        .concert-meta {
+            display: flex; flex-wrap: wrap; gap: 8px 16px;
+            margin-bottom: 16px;
+        }
+        .concert-meta span {
+            font-size: 13px; color: #777;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .concert-footer {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-top: 4px;
+        }
+        .concert-price {
+            font-family: 'Montserrat', sans-serif; font-size: 22px;
+            font-weight: 900; color: #3d2be8;
+        }
+        .concert-price span { font-size: 13px; font-weight: 700; color: #aaa; }
+        .concert-avail {
+            font-size: 12px; color: #aaa;
+            font-family: 'Montserrat', sans-serif; font-weight: 700;
+        }
+        .concert-avail.low { color: #ef5350; }
+        .concert-buy {
+            display: block; width: 100%; margin-top: 16px;
+            background: #3d2be8; color: white; border: none;
+            font-family: 'Montserrat', sans-serif; font-size: 14px;
+            font-weight: 800; padding: 13px; border-radius: 8px;
+            cursor: pointer; transition: .25s; text-align: center;
+            text-decoration: none;
+        }
+        .concert-buy:hover {
+            background: #2a1db8; transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(61,43,232,.4);
+        }
+
+        /* Loading / empty states */
+        .concerte-loading {
+            text-align: center; padding: 60px 0;
+            font-family: 'Montserrat', sans-serif; color: #aaa;
+        }
+        .concerte-empty {
+            text-align: center; padding: 60px 0; grid-column: 1/-1;
+            font-family: 'Montserrat', sans-serif; color: #aaa; font-size: 16px;
+        }
+
+        /* =============================================
+           FOOTER — AUTH REDESIGN
+        ============================================= */
+        .footer { background: #14102e; color: white; }
+
+        .footer-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 540px;
+        }
+
+        /* LEFT — contact */
+        .footer-left {
+            background: #3d2be8;
+            padding: 70px 8%;
+            display: flex; flex-direction: column;
+        }
+        .footer-logo { margin-bottom: 28px; }
+        .footer-left h3 {
+            font-family: 'Montserrat', sans-serif; font-size: 24px;
+            font-weight: 900; margin-bottom: 10px;
+        }
+        .footer-left > p {
+            color: rgba(255,255,255,.65); font-size: 14px;
+            line-height: 1.6; margin-bottom: 28px;
+        }
+        .fci { display: flex; align-items: center; gap: 10px; margin: 10px 0; color: rgba(255,255,255,.8); font-size: 14px; }
+        .fci-icon { font-size: 16px; }
+        .footer-socials { display: flex; gap: 10px; margin-top: 24px; }
+        .fsoc {
+            width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.3);
+            border-radius: 8px; color: rgba(255,255,255,.6);
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; font-size: 14px; transition: .25s;
+        }
+        .fsoc:hover { background: white; color: #3d2be8; border-color: white; }
+
+        /* RIGHT — auth panel */
+        .footer-right {
+            padding: 60px 8%;
+            background: #1a1440;
+        }
+
+        /* Tabs */
+        .auth-tabs {
+            display: flex; gap: 0; margin-bottom: 32px;
+            border-bottom: 2px solid rgba(255,255,255,.1);
+        }
+        .auth-tab {
+            background: transparent; border: none; cursor: pointer;
+            font-family: 'Montserrat', sans-serif; font-size: 14px;
+            font-weight: 900; color: rgba(255,255,255,.4);
+            padding: 10px 28px 13px; position: relative; transition: color .2s;
+        }
+        .auth-tab::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+            height: 2px; background: #3d2be8; transform: scaleX(0); transition: transform .25s;
+        }
+        .auth-tab.active { color: white; }
+        .auth-tab.active::after { transform: scaleX(1); }
+        .auth-tab:hover { color: rgba(255,255,255,.75); }
+
+        /* Form panels */
+        .auth-form { animation: authFadeIn .3s ease; }
+        .auth-form.hidden { display: none !important; }
+        @keyframes authFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-head { margin-bottom: 20px; }
+        .auth-label {
+            font-size: 11px; color: rgba(255,255,255,.3);
+            font-family: 'Montserrat', sans-serif; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            display: block; margin-bottom: 5px;
+        }
+        .auth-title {
+            font-family: 'Montserrat', sans-serif; font-size: 30px;
+            font-weight: 900; color: white; line-height: 1;
+        }
+
+        /* Fields — two columns for name row */
+        .afields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .afield { margin-bottom: 14px; }
+        .albl {
+            display: block; font-family: 'Montserrat', sans-serif;
+            font-size: 10px; font-weight: 800; color: rgba(255,255,255,.4);
+            letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;
+        }
+        .ainp {
+            width: 100%; background: transparent; border: none;
+            border-bottom: 1.5px solid rgba(255,255,255,.18);
+            color: white; font-family: 'Raleway', sans-serif;
+            font-size: 15px; padding: 9px 0; outline: none;
+            transition: border-color .2s;
+        }
+        .ainp::placeholder { color: rgba(255,255,255,.2); }
+        .ainp:focus { border-bottom-color: #3d2be8; }
+        .ainp.valid   { border-bottom-color: #2f9e44; }
+        .ainp.invalid { border-bottom-color: #ff4f4f; animation: fieldShake .35s ease; }
+        @keyframes fieldShake {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        /* Error hint */
+        .field-err {
+            display: none; font-size: 11px; color: #ff7070;
+            margin-top: 4px; font-family: 'Montserrat', sans-serif; font-weight: 700;
+        }
+        .ainp.invalid + .field-err { display: block; }
+
+        /* Password wrap */
+        .pw-wrap { position: relative; }
+        .pw-wrap .ainp { padding-right: 34px; }
+        .pw-eye {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            background: transparent; border: none; cursor: pointer;
+            font-size: 15px; color: rgba(255,255,255,.3); transition: color .2s; padding: 3px;
+        }
+        .pw-eye:hover { color: rgba(255,255,255,.7); }
+
+        /* Strength bar */
+        .pw-strength { height: 3px; border-radius: 3px; margin-top: 6px;
+            background: rgba(255,255,255,.1); overflow: hidden; }
+        .pw-strength-bar { height: 100%; width: 0; border-radius: 3px; transition: width .3s, background .3s; }
+
+        /* Submit button */
+        .auth-btn {
+            width: 100%; padding: 15px; margin-top: 18px;
+            background: #3d2be8; color: white; border: none;
+            border-radius: 8px; font-family: 'Montserrat', sans-serif;
+            font-size: 15px; font-weight: 900; cursor: pointer;
+            transition: all .3s; position: relative; overflow: hidden;
+        }
+        .auth-btn:hover { background: #5242f0; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(61,43,232,.55); }
+        .auth-btn.sending { opacity: .82; cursor: not-allowed; }
+        .auth-btn.sending::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            height: 3px; background: rgba(255,255,255,.6);
+            animation: authProg 1.2s ease forwards;
+        }
+        @keyframes authProg { from { width: 0; } to { width: 100%; } }
+        .auth-btn.sent  { background: #2f9e44; }
+        .auth-btn.err   { background: #ff4f4f; }
+        .auth-btn.shake { animation: authShake .45s ease; }
+        @keyframes authShake {
+            0%,100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        .auth-switch-txt {
+            font-size: 12px; color: rgba(255,255,255,.35);
+            margin-top: 14px; text-align: center;
+        }
+        .auth-switch-txt a { color: #84c4ff; text-decoration: none; font-weight: 700; }
+        .auth-switch-txt a:hover { text-decoration: underline; }
+
+        /* Success state */
+        .auth-success-icon {
+            width: 64px; height: 64px; border-radius: 50%; background: #2f9e44;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; color: white; margin: 10px auto 16px;
+            animation: popIn .4s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        #auth-success h3 { font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 8px; }
+        #auth-success p  { color: rgba(255,255,255,.45); text-align: center; font-size: 14px; }
+        .auth-user-badge {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,.07); border-radius: 12px;
+            padding: 12px 16px; margin: 16px 0;
+        }
+        .auth-user-av {
+            width: 42px; height: 42px; border-radius: 50%; background: #3d2be8;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Montserrat', sans-serif; font-size: 18px;
+            font-weight: 900; color: white; flex-shrink: 0;
+        }
+        .auth-user-name  { color: white; font-weight: 700; font-size: 14px; }
+        .auth-user-email { color: rgba(255,255,255,.4); font-size: 12px; margin-top: 2px; }
+        .auth-logout { background: rgba(255,255,255,.1); margin-top: 14px; }
+        .auth-logout:hover { background: rgba(255,79,79,.35); box-shadow: none; transform: none; }
+
+        /* Footer bottom bar */
+        .footer-bottom {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 22px 8%; border-top: 1px solid rgba(255,255,255,.07);
+        }
+        .footer-nav { display: flex; gap: 26px; list-style: none; }
+        .footer-nav a { color: rgba(255,255,255,.35); font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 700; text-decoration: none; transition: color .2s; }
+        .footer-nav a:hover { color: white; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #2f9e44; color: white; padding: 14px 28px; border-radius: 10px;
+            font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800;
+            box-shadow: 0 10px 30px rgba(0,0,0,.25); opacity: 0;
+            transition: opacity .3s, transform .3s; z-index: 9999; pointer-events: none;
+        }
+        .toast.err { background: #ff4f4f; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .footer-main { grid-template-columns: 1fr; }
+            .afields-row { grid-template-columns: 1fr; }
+            .concerte-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+    <a href="#home" class="logo">Musik.</a>
+    <nav class="navbar">
+        <a href="#home">ACASĂ</a>
+        <a href="#artisti">ARTIȘTI</a>
+        <a href="#categorii">CATEGORII</a>
+        <a href="#recenzii">RECENZII</a>
+        <a href="#contact">CONTACT</a>
+        <a href="#contact" class="ticket-btn">BILETE</a>
+    </nav>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="home">
+    <div class="overlay"></div>
+    <div class="shape shape-one"></div>
+    <div class="shape shape-two"></div>
+    <div class="shape shape-three"></div>
+    <div class="hero-content">
+        <h1>Cea Mai Tare <br><span>Experiență</span><br>Muzicală Din 2026</h1>
+        <p>Simte vibrația concertelor live din Moldova și lasă-te purtat de muzică.</p>
+        <a href="#categorii" class="start-btn">START</a>
+    </div>
+    <div class="countdown">
+        <div><span id="days">00</span><p>d</p></div>
+        <div><span id="hours">00</span><p>h</p></div>
+        <div><span id="minutes">00</span><p>m</p></div>
+        <div><span id="seconds">00</span><p>s</p></div>
+    </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="about" id="despre">
+    <div class="about-images">
+        <img src="../images/foto1.png" class="about-img back" alt="Concert">
+        <img src="../images/foto1.png" class="about-img front" alt="Public">
+    </div>
+    <div class="about-text">
+        <h2>Despre <span>Musik</span></h2>
+        <p>Musik este platforma dedicată celor care caută experiențe muzicale autentice în Moldova. Îți oferim acces la cele mai așteptate concerte și artiști, organizate în locații atent alese — de la săli moderne precum Chișinău Arena și Moldexpo, până la cluburi exclusiviste și evenimente în aer liber. Totul, într-o experiență simplă, rapidă și sigură.</p>
+    </div>
+</section>
+
+<!-- ===== ARTISTS ===== -->
+<section class="artists" id="artisti">
+    <div class="artists-text">
+        <h2>Artiști</h2>
+        <p>Artiștii dau viață fiecărui eveniment, aducând emoție, energie și autenticitate pe scenă. Fie că preferi ritmuri intense sau vibe-uri relaxante, vei găsi aici muzica care te reprezintă și experiențe care rămân.</p>
+        <a href="#categorii" class="artists-btn">Descoperă artiștii</a>
+    </div>
+    <div class="artists-gallery">
+        <img src="../images/artist-1.png" class="artist-img img-one" alt="Artist">
+        <img src="../images/artist-3.png" class="artist-img img-two" alt="Artist">
+        <img src="../images/artist-2.png" class="artist-img img-three" alt="Artist">
+        <img src="../images/artist-4.png" class="artist-img img-four" alt="Artist">
+    </div>
+</section>
+
+<!-- ===== CATEGORIES ===== -->
+<section class="categories" id="categorii">
+    <h2><span>Descoperă</span> după categorie</h2>
+    <div class="category-wrapper">
+        <a href="pop.html" class="category-card pop">
+            <div class="icon">♫</div><h3>Pop</h3><p>Hituri moderne și artiști în top.</p>
+        </a>
+        <a href="folk.html" class="category-card folk">
+            <div class="icon">♬</div><h3>Folk</h3><p>Muzică autentică.</p>
+        </a>
+        <a href="instrumental.html" class="category-card instrumental">
+            <div class="icon">♩</div><h3>Instrumental</h3><p>Sunete fără cuvinte.</p>
+        </a>
+        <a href="rock.html" class="category-card rock">
+            <div class="icon">🎸</div><h3>Rock</h3><p>Energie și adrenalină.</p>
+        </a>
+        <a href="jazz.html" class="category-card jazz">
+            <div class="icon">🎺</div><h3>Jazz</h3><p>Ritmuri elegante.</p>
+        </a>
+    </div>
+    <div class="slider-dots">
+        <span class="dot active" data-index="0"></span>
+        <span class="dot" data-index="1"></span>
+        <span class="dot" data-index="2"></span>
+    </div>
+</section>
+
+<!-- ===== REVIEWS ===== -->
+<section class="reviews" id="recenzii">
+    <div class="reviews-header">
+        <h2>RECENZII</h2>
+        <div class="review-tabs">
+            <button class="review-tab active" data-filter="new">NEW</button>
+            <button class="review-tab" data-filter="popular">POPULAR</button>
+        </div>
+    </div>
+    <button class="review-arrow left" id="prevReview">‹</button>
+    <div class="reviews-slider" id="reviewsSlider"></div>
+    <button class="review-arrow right" id="nextReview">›</button>
+    <div class="review-dots" id="reviewDots"></div>
+    <button class="add-review-btn" id="addReviewBtn">Lasă o recenzie</button>
+</section>
+
+<div class="review-modal" id="reviewModal">
+    <div class="modal-box">
+        <button class="modal-close" id="modalClose">×</button>
+        <h3 id="modalTitle">Lasă o recenzie</h3>
+        <div class="modal-name-box" id="modalNameBox">
+            <label>Nume</label>
+            <input type="text" id="modalName" placeholder="Numele tău">
+        </div>
+        <label>Mesaj</label>
+        <textarea id="modalMessage" placeholder="Scrie mesajul tău..."></textarea>
+        <button class="modal-submit" id="modalSubmit">Trimite</button>
+        <div class="modal-success" id="modalSuccess">✔</div>
+    </div>
+</div>
+
+<!-- ===== MOMENTS ===== -->
+<section class="moments" id="momente">
+    <div class="moments-header">
+        <h2><span>Momente</span> memorabile</h2>
+        <p>Atmosferă live, energie și momente care rămân.</p>
+    </div>
+    <div class="moments-grid">
+        <div class="moment-item big">
+            <img src="../images/moments-1.png" alt="Moment 1">
+            <div class="moment-overlay"><span class="moment-tag">Rock Night 2025</span><div class="moment-stats">♥ 248 &nbsp; 🔁 104</div></div>
+        </div>
+        <div class="moment-item">
+            <img src="../images/moments-2.png" alt="Moment 2">
+            <div class="moment-overlay"><span class="moment-tag">Summer Festival</span><div class="moment-stats">♥ 312 &nbsp; 🔁 89</div></div>
+        </div>
+        <div class="moment-item">
+            <img src="../images/moments-3.png" alt="Moment 3">
+            <div class="moment-overlay"><span class="moment-tag">Neon Nights</span><div class="moment-stats">♥ 198 &nbsp; 🔁 77</div></div>
+        </div>
+        <div class="moment-item">
+            <img src="../images/moments-4.png" alt="Moment 4">
+            <div class="moment-overlay"><span class="moment-tag">Jazz Evening</span><div class="moment-stats">♥ 155 &nbsp; 🔁 62</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer" id="contact">
+    <div class="footer-main">
+
+        <!-- LEFT — Contact -->
+        <div class="footer-left">
+            <a href="#home" class="logo footer-logo">Musik.</a>
+            <h3>Contactează-ne</h3>
+            <p>Suntem aici pentru orice întrebare sau colaborare. Scrie-ne oricând!</p>
+            <div class="footer-contact-items">
+                <div class="fci"><span class="fci-icon">📞</span>+373 123 456 789</div>
+                <div class="fci"><span class="fci-icon">✉️</span>contact@musik.md</div>
+                <div class="fci"><span class="fci-icon">📍</span>Chișinău, Moldova</div>
+            </div>
+            <div class="footer-socials">
+                <a href="#" class="fsoc">f</a>
+                <a href="#" class="fsoc">𝕏</a>
+                <a href="#" class="fsoc">in</a>
+                <a href="#" class="fsoc">▶</a>
+            </div>
+        </div>
+
+        <!-- RIGHT — Auth -->
+        <div class="footer-right">
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="authSwitch('login',this)">Login</button>
+                <button class="auth-tab" onclick="authSwitch('register',this)">Sign Up</button>
+            </div>
+
+            <!-- ── LOGIN ── -->
+            <div class="auth-form" id="auth-login">
+                <div class="auth-head">
+                    <span class="auth-label">Autentificare</span>
+                    <h3 class="auth-title">Login</h3>
+                </div>
+
+                <div class="afield">
+                    <label class="albl">Email</label>
+                    <input id="l-email" class="ainp" type="email" placeholder="email@exemplu.com" autocomplete="email">
+                    <span class="field-err">Email invalid.</span>
+                </div>
+
+                <div class="afield">
+                    <label class="albl">Parolă</label>
+                    <div class="pw-wrap">
+                        <input id="l-pass" class="ainp" type="password" placeholder="••••••••">
+                        <button class="pw-eye" type="button" onclick="toggleEye('l-pass',this)">👁</button>
+                    </div>
+                    <span class="field-err">Câmp obligatoriu.</span>
+                </div>
+
+                <button class="auth-btn" id="btn-login" onclick="doLogin(this)">Login</button>
+                <p class="auth-switch-txt">Nu ai cont? <a href="#" onclick="authSwitch('register',document.querySelectorAll('.auth-tab')[1]);return false;">Înregistrează-te</a></p>
+            </div>
+
+            <!-- ── SIGN UP ── -->
+            <div class="auth-form hidden" id="auth-register">
+                <div class="auth-head">
+                    <span class="auth-label">Cont nou</span>
+                    <h3 class="auth-title">Sign Up</h3>
+                </div>
+
+                <div class="afields-row">
+                    <div class="afield">
+                        <label class="albl">Nume</label>
+                        <input id="r-nume" class="ainp" type="text" placeholder="Popescu" autocomplete="family-name">
+                        <span class="field-err">Câmp obligatoriu.</span>
+                    </div>
+                    <div class="afield">
+                        <label class="albl">Prenume</label>
+                        <input id="r-prenume" class="ainp" type="text" placeholder="Ion" autocomplete="given-name">
+                        <span class="field-err">Câmp obligatoriu.</span>
+                    </div>
+                </div>
+
+                <div class="afield">
+                    <label class="albl">Email</label>
+                    <input id="r-email" class="ainp" type="email" placeholder="email@exemplu.com" autocomplete="email">
+                    <span class="field-err">Email invalid.</span>
+                </div>
+
+                <div class="afield">
+                    <label class="albl">Telefon</label>
+                    <input id="r-telefon" class="ainp" type="tel" value="+373 " maxlength="15" autocomplete="tel">
+                    <span class="field-err">Doar cifre (min 7).</span>
+                </div>
+
+                <div class="afield">
+                    <label class="albl">Parolă</label>
+                    <div class="pw-wrap">
+                        <input id="r-pass" class="ainp" type="password" placeholder="min. 8 caractere" oninput="checkStrength(this.value)">
+                        <button class="pw-eye" type="button" onclick="toggleEye('r-pass',this)">👁</button>
+                    </div>
+                    <div class="pw-strength"><div class="pw-strength-bar" id="strengthBar"></div></div>
+                    <span class="field-err">Minim 8 caractere.</span>
+                </div>
+
+                <div class="afield">
+                    <label class="albl">Confirmă Parola</label>
+                    <div class="pw-wrap">
+                        <input id="r-pass2" class="ainp" type="password" placeholder="••••••••">
+                        <button class="pw-eye" type="button" onclick="toggleEye('r-pass2',this)">👁</button>
+                    </div>
+                    <span class="field-err">Parolele nu coincid.</span>
+                </div>
+
+                <button class="auth-btn" id="btn-register" onclick="doRegister(this)">Creează Cont</button>
+                <p class="auth-switch-txt">Ai cont? <a href="#" onclick="authSwitch('login',document.querySelectorAll('.auth-tab')[0]);return false;">Autentifică-te</a></p>
+            </div>
+
+            <!-- ── SUCCESS STATE ── -->
+            <div class="auth-form hidden" id="auth-success">
+                <div class="auth-success-icon">✓</div>
+                <h3 id="auth-success-title">Autentificat!</h3>
+                <p id="auth-success-msg">Bine ai venit în comunitatea Musik.</p>
+                <div id="auth-user-badge" class="auth-user-badge"></div>
+                <button class="auth-btn auth-logout" onclick="doLogout()">Deconectează-te</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <a href="#home" class="logo" style="font-size:20px">Musik.</a>
+        <ul class="footer-nav">
+            <li><a href="#home">Acasă</a></li>
+            <li><a href="#artisti">Artiști</a></li>
+            <li><a href="#categorii">Categorii</a></li>
+            <li><a href="#concerte">Concerte</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="footer-socials">
+            <a href="#" class="fsoc">f</a>
+            <a href="#" class="fsoc">𝕏</a>
+            <a href="#" class="fsoc">in</a>
+            <a href="#" class="fsoc">▶</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="script.js"></script>
+<script>
+
+/* =============================================
+   TOAST
+============================================= */
+function showToast(msg, err) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (err ? ' err' : '') + ' show';
+    setTimeout(function(){ t.className = 'toast' + (err ? ' err' : ''); }, 3200);
+}
+
+
+/* =============================================
+   AUTH — Switch tabs
+============================================= */
+function authSwitch(tab, clickedBtn) {
+    document.querySelectorAll('.auth-tab').forEach(function(b){ b.classList.remove('active'); });
+    if (clickedBtn) clickedBtn.classList.add('active');
+    document.getElementById('auth-login').classList.toggle('hidden',    tab !== 'login');
+    document.getElementById('auth-register').classList.toggle('hidden', tab !== 'register');
+    document.getElementById('auth-success').classList.add('hidden');
+}
+
+/* Toggle password visibility */
+function toggleEye(id, btn) {
+    var inp = document.getElementById(id);
+    var show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.textContent = show ? '🙈' : '👁';
+}
+
+/* Password strength indicator */
+function checkStrength(val) {
+    var bar = document.getElementById('strengthBar');
+    if (!bar) return;
+    var score = 0;
+    if (val.length >= 8)  score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    var colors = ['#ff4f4f','#ff9800','#f9a825','#2f9e44'];
+    var widths  = ['25%','50%','75%','100%'];
+    bar.style.width      = score ? widths[score-1]  : '0';
+    bar.style.background = score ? colors[score-1]  : 'transparent';
+}
+
+/* Validate a single field */
+function validateField(el, rule) {
+    var val = el.value.trim();
+    var ok  = rule(val, el);
+    el.classList.toggle('valid',   ok);
+    el.classList.toggle('invalid', !ok);
+    return ok;
+}
+
+/* Rules */
+var rules = {
+    notEmpty:  function(v){ return v.length > 0; },
+    email:     function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); },
+    pass8:     function(v){ return v.length >= 8; },
+    phone:     function(v){ return /^\+?[0-9]{7,15}$/.test(v); }
+};
+
+/* Save indicator (inline reuse) */
+function markSaved() { /* optional — removed for cleanliness */ }
+
+
+/* =============================================
+   REGISTER
+============================================= */
+function doRegister(btn) {
+    var numeEl    = document.getElementById('r-nume');
+    var prenumeEl = document.getElementById('r-prenume');
+    var emailEl   = document.getElementById('r-email');
+    var telEl     = document.getElementById('r-telefon');
+    var passEl    = document.getElementById('r-pass');
+    var pass2El   = document.getElementById('r-pass2');
+
+    var ok = true;
+    ok = validateField(numeEl,    rules.notEmpty) && ok;
+    ok = validateField(prenumeEl, rules.notEmpty) && ok;
+    ok = validateField(emailEl,   rules.email)    && ok;
+    ok = validateField(telEl,     rules.phone)    && ok;
+    ok = validateField(passEl,    rules.pass8)    && ok;
+
+    // Confirmare parolă
+    var passMatch = passEl.value === pass2El.value && pass2El.value.length > 0;
+    pass2El.classList.toggle('valid',   passMatch);
+    pass2El.classList.toggle('invalid', !passMatch);
+    if (!passMatch) ok = false;
+
+    if (!ok) {
+        btn.classList.add('shake');
+        setTimeout(function(){ btn.classList.remove('shake'); }, 500);
+        showToast('Completați corect toate câmpurile!', true);
+        return;
+    }
+
+    // Verifică dacă emailul e deja înregistrat
+    var accounts = JSON.parse(localStorage.getItem('musik_accounts') || '[]');
+    var exists = accounts.some(function(a){ return a.email === emailEl.value.trim(); });
+    if (exists) {
+        emailEl.classList.add('invalid');
+        showToast('Acest email este deja înregistrat!', true);
+        return;
+    }
+
+    btn.classList.add('sending');
+    btn.textContent = 'Se creează contul…';
+
+    setTimeout(function(){
+        var user = {
+            nume:    numeEl.value.trim(),
+            prenume: prenumeEl.value.trim(),
+            email:   emailEl.value.trim(),
+            telefon: telEl.value.trim(),
+            pass:    passEl.value,
+            creatLa: new Date().toISOString()
+        };
+
+        // Salvare în localStorage (simulează data.json)
+        accounts.push(user);
+        localStorage.setItem('musik_accounts', JSON.stringify(accounts));
+        localStorage.setItem('musik_user', JSON.stringify(user));
+
+        btn.classList.remove('sending');
+        btn.classList.add('sent');
+        btn.textContent = '✓ Cont creat!';
+
+        showToast('Cont creat cu succes! Bine ai venit, ' + user.prenume + '! 🎉');
+
+        setTimeout(function(){
+            showAuthSuccess(user.prenume + ' ' + user.nume, user.email, 'Cont creat!');
+        }, 600);
+    }, 1000);
+}
+
+
+/* =============================================
+   LOGIN
+============================================= */
+function doLogin(btn) {
+    var emailEl = document.getElementById('l-email');
+    var passEl  = document.getElementById('l-pass');
+
+    var ok = true;
+    ok = validateField(emailEl, rules.email)    && ok;
+    ok = validateField(passEl,  rules.notEmpty) && ok;
+
+    if (!ok) {
+        btn.classList.add('shake');
+        setTimeout(function(){ btn.classList.remove('shake'); }, 500);
+        return;
+    }
+
+    btn.classList.add('sending');
+    btn.textContent = 'Se verifică…';
+
+    setTimeout(function(){
+        var accounts = JSON.parse(localStorage.getItem('musik_accounts') || '[]');
+        var found = null;
+        accounts.forEach(function(a){
+            if (a.email === emailEl.value.trim() && a.pass === passEl.value) found = a;
+        });
+
+        btn.classList.remove('sending');
+
+        if (!found) {
+            btn.classList.add('err');
+            btn.textContent = '✗ Date incorecte';
+            emailEl.classList.add('invalid');
+            passEl.classList.add('invalid');
+            showToast('Email sau parolă greșită!', true);
+            setTimeout(function(){
+                btn.classList.remove('err');
+                btn.textContent = 'Login';
+            }, 2200);
+            return;
+        }
+
+        localStorage.setItem('musik_user', JSON.stringify(found));
+        btn.classList.add('sent');
+        btn.textContent = '✓ Succes!';
+        showToast('Bine ai revenit, ' + found.prenume + '! 👋');
+
+        setTimeout(function(){
+            var name = (found.prenume || '') + ' ' + (found.nume || '');
+            showAuthSuccess(name.trim() || found.email, found.email, 'Autentificat!');
+        }, 600);
+    }, 900);
+}
+
+
+/* =============================================
+   SUCCESS STATE
+============================================= */
+function showAuthSuccess(name, email, title) {
+    document.getElementById('auth-login').classList.add('hidden');
+    document.getElementById('auth-register').classList.add('hidden');
+    document.getElementById('auth-success').classList.remove('hidden');
+    document.querySelectorAll('.auth-tab').forEach(function(t){ t.style.display = 'none'; });
+
+    document.getElementById('auth-success-title').textContent = title || 'Autentificat!';
+    document.getElementById('auth-success-msg').textContent   = 'Bine ai venit, ' + name + '!';
+
+    document.getElementById('auth-user-badge').innerHTML =
+        '<div class="auth-user-av">' + (name.charAt(0) || '?').toUpperCase() + '</div>' +
+        '<div>' +
+            '<div class="auth-user-name">'  + name  + '</div>' +
+            '<div class="auth-user-email">' + email + '</div>' +
+        '</div>';
+}
+
+function doLogout() {
+    localStorage.removeItem('musik_user');
+    document.getElementById('auth-success').classList.add('hidden');
+    document.querySelectorAll('.auth-tab').forEach(function(t){ t.style.display = ''; });
+    var btnL = document.getElementById('btn-login');
+    var btnR = document.getElementById('btn-register');
+    if (btnL) { btnL.className = 'auth-btn'; btnL.textContent = 'Login'; }
+    if (btnR) { btnR.className = 'auth-btn'; btnR.textContent = 'Creează Cont'; }
+    authSwitch('login', document.querySelector('.auth-tab'));
+    showToast('Te-ai deconectat.');
+}
+
+/* Check if already logged in on load */
+(function(){
+    var user = JSON.parse(localStorage.getItem('musik_user') || 'null');
+    if (user) {
+        var name = (user.prenume || '') + ' ' + (user.nume || '');
+        showAuthSuccess(name.trim() || user.email, user.email, 'Bine ai revenit!');
+    }
+})();
+
+</script>
+<script src="../js/main.js"></script>
+</body>
+</html>
