@@ -1,585 +1,692 @@
+/* ===== COUNTDOWN ===== */
+
+const eventDate = new Date("2026-05-05T16:00:00").getTime();
+
+function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = eventDate - now;
+
+    if (distance <= 0) {
+        document.getElementById("days").textContent = "00";
+        document.getElementById("hours").textContent = "00";
+        document.getElementById("minutes").textContent = "00";
+        document.getElementById("seconds").textContent = "00";
+        return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((distance / (1000 * 60)) % 60);
+    const seconds = Math.floor((distance / 1000) % 60);
+
+    document.getElementById("days").textContent = days;
+    document.getElementById("hours").textContent = hours;
+    document.getElementById("minutes").textContent = minutes;
+    document.getElementById("seconds").textContent = seconds;
+}
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+
+/* ===== ABOUT ANIMATION ===== */
+
+const aboutSection = document.querySelector(".about");
+
+function showAbout() {
+    if (!aboutSection) return;
+
+    if (aboutSection.getBoundingClientRect().top < window.innerHeight - 120) {
+        aboutSection.classList.add("show");
+    }
+}
+
+window.addEventListener("scroll", showAbout);
+showAbout();
+
+
+/* ===== ARTISTS ANIMATION ===== */
+
+const artistsSection = document.querySelector(".artists");
+
+function showArtists() {
+    if (!artistsSection) return;
+
+    if (artistsSection.getBoundingClientRect().top < window.innerHeight - 120) {
+        artistsSection.classList.add("show");
+    }
+}
+
+window.addEventListener("scroll", showArtists);
+showArtists();
+
+
+/* ===== CATEGORIES SLIDER ===== */
+
+const categoryWrapper = document.querySelector(".category-wrapper");
+const originalCards = Array.from(document.querySelectorAll(".category-card"));
+const dots = document.querySelectorAll(".dot");
+
+if (categoryWrapper && originalCards.length > 0) {
+    originalCards.forEach(function(card) {
+        const clone = card.cloneNode(true);
+        categoryWrapper.appendChild(clone);
+    });
+
+    let isPaused = false;
+    let speed = 0.7;
+
+    function updateDots() {
+        const cardWidth = originalCards[0].offsetWidth + 30;
+        const activeIndex = Math.floor(categoryWrapper.scrollLeft / cardWidth) % originalCards.length;
+
+        dots.forEach(function(dot) {
+            dot.classList.remove("active");
+        });
+
+        if (dots[activeIndex]) {
+            dots[activeIndex].classList.add("active");
+        }
+    }
+
+    function infiniteMove() {
+        if (!isPaused) {
+            categoryWrapper.scrollLeft += speed;
+
+            if (categoryWrapper.scrollLeft >= categoryWrapper.scrollWidth / 2) {
+                categoryWrapper.scrollLeft = 0;
+            }
+
+            updateDots();
+        }
+
+        requestAnimationFrame(infiniteMove);
+    }
+
+    categoryWrapper.addEventListener("mouseenter", function() {
+        isPaused = true;
+    });
+
+    categoryWrapper.addEventListener("mouseleave", function() {
+        isPaused = false;
+    });
+
+    categoryWrapper.addEventListener("wheel", function(event) {
+        event.preventDefault();
+
+        categoryWrapper.scrollLeft += event.deltaY;
+
+        if (categoryWrapper.scrollLeft >= categoryWrapper.scrollWidth / 2) {
+            categoryWrapper.scrollLeft = 0;
+        }
+
+        if (categoryWrapper.scrollLeft < 0) {
+            categoryWrapper.scrollLeft = categoryWrapper.scrollWidth / 2;
+        }
+
+        updateDots();
+    });
+
+    dots.forEach(function(dot) {
+        dot.addEventListener("mouseenter", function() {
+            isPaused = true;
+
+            const index = Number(dot.dataset.index);
+            const cardWidth = originalCards[0].offsetWidth + 30;
+
+            categoryWrapper.scrollTo({
+                left: index * cardWidth,
+                behavior: "smooth"
+            });
+
+            dots.forEach(function(d) {
+                d.classList.remove("active");
+            });
+
+            dot.classList.add("active");
+        });
+
+        dot.addEventListener("mouseleave", function() {
+            isPaused = false;
+        });
+
+        dot.addEventListener("click", function() {
+            const index = Number(dot.dataset.index);
+            const cardWidth = originalCards[0].offsetWidth + 30;
+
+            categoryWrapper.scrollTo({
+                left: index * cardWidth,
+                behavior: "smooth"
+            });
+        });
+    });
+
+    updateDots();
+    infiniteMove();
+}
+
+
+/* ===== REVIEWS ===== */
+
+const reviews = [
+    {
+        name: "Daniel Pop",
+        img: "images/review-1.jpg",
+        text: "Ca artist, am participat atât ca performer cât și ca spectator. Nivelul tehnic și profesionalismul echipei Musik nu au egal în industrie.",
+        likes: 18,
+        dislikes: 1,
+        date: 1,
+        voted: null
+    },
+    {
+        name: "Maria Ionescu",
+        img: "images/review-2.jpg",
+        text: "Tot procesul a fost rapid, iar concertul a fost minunat. Atmosfera a fost exact cum mi-am dorit.",
+        likes: 9,
+        dislikes: 0,
+        date: 2,
+        voted: null
+    },
+    {
+        name: "Elena Marinescu",
+        img: "images/review-3.jpg",
+        text: "O platformă simplă și eficientă. Mi-a plăcut cât de repede am putut găsi evenimentul dorit.",
+        likes: 15,
+        dislikes: 2,
+        date: 3,
+        voted: null
+    }
+];
+
+const reviewsSlider = document.getElementById("reviewsSlider");
+const reviewDots = document.getElementById("reviewDots");
+const reviewTabs = document.querySelectorAll(".review-tab");
+const addReviewBtn = document.getElementById("addReviewBtn");
+const prevReview = document.getElementById("prevReview");
+const nextReviewBtn = document.getElementById("nextReview");
+
+const reviewModal = document.getElementById("reviewModal");
+const modalClose = document.getElementById("modalClose");
+const modalName = document.getElementById("modalName");
+const modalMessage = document.getElementById("modalMessage");
+const modalSubmit = document.getElementById("modalSubmit");
+const modalSuccess = document.getElementById("modalSuccess");
+
+let currentReviews = [...reviews];
+let reviewIndex = 0;
+let reviewTimer;
+
+function renderReviews() {
+    if (!reviewsSlider || !reviewDots) return;
+
+    reviewsSlider.innerHTML = "";
+    reviewDots.innerHTML = "";
+
+    currentReviews.forEach(function(review, i) {
+        const card = document.createElement("div");
+        card.className = "review-card";
+
+        card.innerHTML = `
+            <div class="quote left-quote">“</div>
+            <div class="quote right-quote">”</div>
+
+            <div class="review-user">
+                <img src="${review.img}" alt="${review.name}">
+                <h3>${review.name}</h3>
+            </div>
+
+            <p class="review-text">${review.text}</p>
+
+            <div class="review-actions">
+                <button class="${review.voted === "like" ? "voted" : ""}" onclick="likeReview(${i})">
+                    ♡ ${review.likes}
+                </button>
+
+                <button class="${review.voted === "dislike" ? "voted" : ""}" onclick="dislikeReview(${i})">
+                    👎 ${review.dislikes}
+                </button>
+            </div>
+        `;
+
+        reviewsSlider.appendChild(card);
+
+        const dot = document.createElement("span");
+        dot.className = "review-dot";
+
+        dot.addEventListener("click", function() {
+            reviewIndex = i;
+            updateReviews();
+            restartReviews();
+        });
+
+        reviewDots.appendChild(dot);
+    });
+
+    updateReviews();
+}
+
+function updateReviews() {
+    const cards = document.querySelectorAll(".review-card");
+    const dotsReview = document.querySelectorAll(".review-dot");
+
+    if (cards.length === 0) return;
+
+    cards.forEach(function(card) {
+        card.className = "review-card";
+    });
+
+    dotsReview.forEach(function(dot) {
+        dot.classList.remove("active");
+    });
+
+    const left = (reviewIndex - 1 + cards.length) % cards.length;
+    const right = (reviewIndex + 1) % cards.length;
+
+    cards[reviewIndex].classList.add("active");
+    cards[left].classList.add("left");
+    cards[right].classList.add("right");
+
+    if (dotsReview[reviewIndex]) {
+        dotsReview[reviewIndex].classList.add("active");
+    }
+}
+
+function goReview(direction) {
+    reviewIndex += direction;
+
+    if (reviewIndex < 0) {
+        reviewIndex = currentReviews.length - 1;
+    }
+
+    if (reviewIndex >= currentReviews.length) {
+        reviewIndex = 0;
+    }
+
+    updateReviews();
+    restartReviews();
+}
+
+function startReviews() {
+    clearInterval(reviewTimer);
+    reviewTimer = setInterval(function() {
+        goReview(1);
+    }, 5500);
+}
+
+function restartReviews() {
+    clearInterval(reviewTimer);
+    startReviews();
+}
+
+if (prevReview) {
+    prevReview.addEventListener("click", function() {
+        goReview(-1);
+    });
+}
+
+if (nextReviewBtn) {
+    nextReviewBtn.addEventListener("click", function() {
+        goReview(1);
+    });
+}
+
+function likeReview(i) {
+    if (currentReviews[i].voted === "like") {
+        currentReviews[i].likes--;
+        currentReviews[i].voted = null;
+    } else {
+        if (currentReviews[i].voted === "dislike") {
+            currentReviews[i].dislikes--;
+        }
+
+        currentReviews[i].likes++;
+        currentReviews[i].voted = "like";
+    }
+
+    renderReviews();
+}
+
+function dislikeReview(i) {
+    if (currentReviews[i].voted === "dislike") {
+        currentReviews[i].dislikes--;
+        currentReviews[i].voted = null;
+    } else {
+        if (currentReviews[i].voted === "like") {
+            currentReviews[i].likes--;
+        }
+
+        currentReviews[i].dislikes++;
+        currentReviews[i].voted = "dislike";
+    }
+
+    renderReviews();
+}
+
+function openReviewModal() {
+    if (!reviewModal) return;
+
+    modalName.value = "";
+    modalMessage.value = "";
+    modalSuccess.classList.remove("show");
+    reviewModal.classList.add("show");
+}
+
+function closeModal() {
+    reviewModal.classList.remove("show");
+    modalSuccess.classList.remove("show");
+}
+
+if (addReviewBtn) {
+    addReviewBtn.addEventListener("click", openReviewModal);
+}
+
+if (modalClose) {
+    modalClose.addEventListener("click", closeModal);
+}
+
+if (reviewModal) {
+    reviewModal.addEventListener("click", function(event) {
+        if (event.target === reviewModal) {
+            closeModal();
+        }
+    });
+}
+
+if (modalSubmit) {
+    modalSubmit.addEventListener("click", function() {
+        const name = modalName.value.trim();
+        const message = modalMessage.value.trim();
+
+        if (name === "" || message === "") {
+            return;
+        }
+
+        currentReviews.unshift({
+            name: name,
+            img: "images/review-default.jpg",
+            text: message,
+            likes: 0,
+            dislikes: 0,
+            date: 0,
+            voted: null
+        });
+
+        reviewIndex = 0;
+
+        modalSuccess.classList.add("show");
+
+        setTimeout(function() {
+            closeModal();
+            renderReviews();
+            restartReviews();
+        }, 800);
+    });
+}
+
+reviewTabs.forEach(function(tab) {
+    tab.addEventListener("click", function() {
+        reviewTabs.forEach(function(t) {
+            t.classList.remove("active");
+        });
+
+        tab.classList.add("active");
+
+        if (tab.dataset.filter === "popular") {
+            currentReviews.sort(function(a, b) {
+                return b.likes - a.likes;
+            });
+        } else {
+            currentReviews.sort(function(a, b) {
+                return a.date - b.date;
+            });
+        }
+
+        reviewIndex = 0;
+        renderReviews();
+        restartReviews();
+    });
+});
+
+if (reviewsSlider) {
+    reviewsSlider.addEventListener("mouseenter", function() {
+        clearInterval(reviewTimer);
+    });
+
+    reviewsSlider.addEventListener("mouseleave", function() {
+        startReviews();
+    });
+
+    renderReviews();
+    startReviews();
+}
+
 /* ===========================
-   MUSIK — main.js
+   MOMENTS — Scroll Reveal
    =========================== */
 
-/* ───────────────────────────
-   COUNTDOWN TIMER
-─────────────────────────── */
-const TARGET = new Date(Date.now() + (22 * 86400 + 13 * 3600 + 46 * 60 + 18) * 1000);
+const momentsSection = document.querySelector(".moments");
 
-function tick() {
-  const dif = TARGET - Date.now();
-  if (dif <= 0) return;
-  document.getElementById('d').textContent = String(Math.floor(dif / 86400000)).padStart(2, '0');
-  document.getElementById('h').textContent = String(Math.floor(dif % 86400000 / 3600000)).padStart(2, '0');
-  document.getElementById('m').textContent = String(Math.floor(dif % 3600000 / 60000)).padStart(2, '0');
-  document.getElementById('s').textContent = String(Math.floor(dif % 60000 / 1000)).padStart(2, '0');
-}
-setInterval(tick, 1000);
-tick();
-
-/* ───────────────────────────
-   REVIEWS SLIDER
-─────────────────────────── */
-const REVIEWS = [
-  {
-    n: 'Alex Bose',
-    r: 'Fan muzică, București',
-    i: 'https://i.pravatar.cc/150?img=32',
-    t: 'O experiență absolut extraordinară! Am participat la ediția din 2025 și a depășit orice așteptări. Organizare impecabilă, artiști de top și o atmosferă care te face să uiți de orice grijă. Deja mi-am luat bilete pentru 2026!'
-  },
-  {
-    n: 'Maria Ionescu',
-    r: 'Blogger cultural, Cluj',
-    i: 'https://i.pravatar.cc/150?img=44',
-    t: 'Musik este cel mai bine organizat festival din România. Fiecare detaliu a fost gândit pentru confortul participanților. Artiștii internaționali au fost o surpriză uriașă — nu mă așteptam la un nivel atât de înalt!'
-  },
-  {
-    n: 'Daniel Pop',
-    r: 'Muzician, Iași',
-    i: 'https://i.pravatar.cc/150?img=11',
-    t: 'Ca artist, am participat atât ca performer cât și ca spectator. Nivelul tehnic și profesionalismul echipei Musik nu au egal în industrie. Recomandat cu căldură oricui iubește muzica adevărată.'
-  }
-];
-
-let reviewIndex = 0;
-
-function chR(direction) {
-  reviewIndex = (reviewIndex + direction + REVIEWS.length) % REVIEWS.length;
-  const r = REVIEWS[reviewIndex];
-  document.getElementById('rav').src = r.i;
-  document.getElementById('rnm').textContent = r.n;
-  document.getElementById('rrl').textContent = r.r;
-  document.getElementById('rtx').textContent = r.t;
-  document.querySelectorAll('.rdot').forEach((dot, i) => dot.classList.toggle('on', i === reviewIndex));
-}
-
-// Dot click navigation
-document.querySelectorAll('.rdot').forEach((dot, i) => {
-  dot.addEventListener('click', () => {
-    reviewIndex = i - 1;
-    chR(1);
-  });
-});
-
-// Auto-advance every 5 seconds
-setInterval(() => chR(1), 5000);
-
-/* ───────────────────────────
-   SCROLL REVEAL
-─────────────────────────── */
-const revealObserver = new IntersectionObserver(
-  (entries) => entries.forEach(entry => {
-    if (entry.isIntersecting) entry.target.classList.add('in');
-  }),
-  { threshold: 0.1 }
-);
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-/* ───────────────────────────
-   CATEGORY CARDS
-─────────────────────────── */
-document.querySelectorAll('.ccard').forEach(card => {
-  card.addEventListener('click', () => {
-    document.querySelectorAll('.ccard').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-  });
-});
-
-/* ───────────────────────────
-   CONTACT FORM — localStorage + feedback vizual
-─────────────────────────── */
-
-// Câmpurile formularului cu cheile lor din localStorage
-const FORM_FIELDS = [
-  { id: 'f-prenume',  key: 'musik_prenume' },
-  { id: 'f-nume',     key: 'musik_nume'    },
-  { id: 'f-email',    key: 'musik_email'   },
-  { id: 'f-telefon',  key: 'musik_telefon' },
-  { id: 'f-subiect',  key: 'musik_subiect' },
-];
-
-// ── Salvează datele în localStorage la fiecare input ──
-function saveFormData() {
-  FORM_FIELDS.forEach(({ id, key }) => {
-    const el = document.getElementById(id);
-    if (el) localStorage.setItem(key, el.value);
-  });
-  // Actualizează indicatorul vizual
-  const ind = document.getElementById('save-indicator');
-  const txt = document.getElementById('save-text');
-  if (ind && txt) {
-    ind.classList.add('active');
-    txt.textContent = '✓ Date salvate automat';
-    clearTimeout(window._saveTimeout);
-    window._saveTimeout = setTimeout(() => {
-      ind.classList.remove('active');
-      txt.textContent = 'Date salvate în browser';
-    }, 1800);
-  }
-}
-
-// ── Încarcă datele salvate la deschiderea paginii ──
-function loadFormData() {
-  FORM_FIELDS.forEach(({ id, key }) => {
-    const el = document.getElementById(id);
-    const saved = localStorage.getItem(key);
-    if (el && saved) {
-      el.value = saved;
-      el.classList.add('has-value'); // feedback vizual
+function showMoments() {
+    if (!momentsSection) return;
+    if (momentsSection.getBoundingClientRect().top < window.innerHeight - 100) {
+        momentsSection.classList.add("show");
     }
-  });
 }
 
-// ── Validare simplă câmp ──
-function validateField(el) {
-  const val = el.value.trim();
-  if (val === '') {
-    el.classList.remove('valid');
-    el.classList.add('invalid');
-    return false;
-  }
-  if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-    el.classList.remove('valid');
-    el.classList.add('invalid');
-    return false;
-  }
-  el.classList.remove('invalid');
-  el.classList.add('valid');
-  return true;
-}
+window.addEventListener("scroll", showMoments);
+showMoments();
 
-// ── Atașează evenimentele pe câmpuri ──
-function initForm() {
-  loadFormData();
-
-  FORM_FIELDS.forEach(({ id }) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    // Salvare la fiecare tastă
-    el.addEventListener('input', () => {
-      saveFormData();
-      validateField(el);
-      el.classList.toggle('has-value', el.value.trim() !== '');
-    });
-
-    // Validare la blur (când iese din câmp)
-    el.addEventListener('blur', () => validateField(el));
-
-    // Focus: adaugă clasa focused
-    el.addEventListener('focus', () => el.classList.add('focused'));
-    el.addEventListener('blur',  () => el.classList.remove('focused'));
-  });
-}
-
-// ── Submit formular ──
-function subForm(btn) {
-  // Validează toate câmpurile
-  let allValid = true;
-  FORM_FIELDS.forEach(({ id }) => {
-    const el = document.getElementById(id);
-    if (el && !validateField(el)) allValid = false;
-  });
-
-  if (!allValid) {
-    btn.classList.add('shake');
-    setTimeout(() => btn.classList.remove('shake'), 500);
-    return;
-  }
-
-  // Animație de trimitere
-  btn.classList.add('sending');
-  btn.textContent = 'Se trimite...';
-
-  setTimeout(() => {
-    btn.classList.remove('sending');
-    btn.classList.add('sent');
-    btn.textContent = '✓ Trimis cu succes!';
-
-    // Șterge datele din localStorage după trimitere
-    FORM_FIELDS.forEach(({ id, key }) => {
-      localStorage.removeItem(key);
-      const el = document.getElementById(id);
-      if (el) {
-        el.value = '';
-        el.classList.remove('valid', 'invalid', 'has-value');
-      }
-    });
-
-    setTimeout(() => {
-      btn.classList.remove('sent');
-      btn.textContent = 'Trimite Mesajul';
-    }, 3000);
-  }, 1200);
-}
-
-// Inițializează formularul
-document.addEventListener('DOMContentLoaded', initForm);
-
-/* ───────────────────────────
-   SMOOTH NAV LINKS
-─────────────────────────── */
-document.querySelectorAll('a[href^="#"]').forEach(link => {
-  link.addEventListener('click', e => {
-    const target = document.querySelector(link.getAttribute('href'));
-    if (target) {
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
-  });
-});
-
-/* ───────────────────────────
-   NAV ACTIVE STATE ON SCROLL
-─────────────────────────── */
-const sections = document.querySelectorAll('section[id], footer[id]');
-const navLinks = document.querySelectorAll('.nav-ul a');
-
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navLinks.forEach(link => {
-          link.style.color = '';
-          if (link.getAttribute('href') === '#' + entry.target.id) {
-            link.style.color = 'white';
-          }
-        });
-      }
-    });
-  },
-  { threshold: 0.5 }
-);
-sections.forEach(sec => sectionObserver.observe(sec));
 
 /* ===========================
-   AUTH — Login & Sign Up
+   AUTH — Login / Sign Up
    localStorage + feedback vizual
    =========================== */
 
-const LOGIN_FIELDS = [
-  { id: 'l-name', key: 'musik_l_name' },
-  { id: 'l-email', key: 'musik_l_email' },
-  { id: 'l-phone', key: 'musik_l_phone' }
+const AUTH_LOGIN_FIELDS  = [
+    { id: "l-name",  key: "musik_l_name"  },
+    { id: "l-email", key: "musik_l_email" },
+    { id: "l-phone", key: "musik_l_phone" }
 ];
 
-const SIGNUP_FIELDS = [
-  { id: 's-name', key: 'musik_s_name' },
-  { id: 's-email', key: 'musik_s_email' },
-  { id: 's-phone', key: 'musik_s_phone' }
+const AUTH_SIGNUP_FIELDS = [
+    { id: "s-name",  key: "musik_s_name"  },
+    { id: "s-email", key: "musik_s_email" },
+    { id: "s-phone", key: "musik_s_phone" }
 ];
 
-function switchTab(tab, clickedBtn) {
-  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
-  if (clickedBtn) clickedBtn.classList.add('active');
+/* Comută tab-ul activ */
+function authSwitch(tab, clickedBtn) {
+    document.querySelectorAll(".auth-tab").forEach(function(b) { b.classList.remove("active"); });
+    if (clickedBtn) clickedBtn.classList.add("active");
 
-  document.getElementById('tab-login').classList.toggle('hidden', tab !== 'login');
-  document.getElementById('tab-signup').classList.toggle('hidden', tab !== 'signup');
-  document.getElementById('tab-success').classList.add('hidden');
+    document.getElementById("auth-login").classList.toggle("hidden",   tab !== "login");
+    document.getElementById("auth-signup").classList.toggle("hidden",  tab !== "signup");
+    document.getElementById("auth-success").classList.add("hidden");
 }
 
-function togglePw(inputId, btn) {
-  const inp = document.getElementById(inputId);
-  if (!inp) return;
-
-  const show = inp.type === 'password';
-  inp.type = show ? 'text' : 'password';
-  btn.textContent = show ? '🙈' : '👁';
+/* Arată/ascunde parolă */
+function toggleEye(inputId, btn) {
+    var inp = document.getElementById(inputId);
+    if (!inp) return;
+    var show = inp.type === "password";
+    inp.type = show ? "text" : "password";
+    btn.textContent = show ? "🙈" : "👁";
 }
 
-function setInvalid(el) {
-  el.classList.remove('valid');
-  el.classList.add('invalid');
-}
-
-function setValid(el) {
-  el.classList.remove('invalid');
-  el.classList.add('valid');
-}
-
-function validateAuthField(el) {
-  const val = el.value.trim();
-
-  if (val === '') {
-    setInvalid(el);
-    return false;
-  }
-
-  if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-    setInvalid(el);
-    return false;
-  }
-
-  if ((el.id === 'l-phone' || el.id === 's-phone') && !/^\d+$/.test(val)) {
-    setInvalid(el);
-    return false;
-  }
-
-  if ((el.id === 'l-pass' || el.id === 's-pass' || el.id === 's-pass2') && val.length < 8) {
-    setInvalid(el);
-    return false;
-  }
-
-  setValid(el);
-  return true;
-}
-
-function saveAuthField(fieldKey, value, indicatorId, textId) {
-  localStorage.setItem(fieldKey, value);
-
-  const ind = document.getElementById(indicatorId);
-  const txt = document.getElementById(textId);
-
-  if (ind && txt) {
-    ind.classList.add('active');
-    txt.textContent = '✓ Date salvate automat';
-
-    clearTimeout(window['_st_' + indicatorId]);
-
-    window['_st_' + indicatorId] = setTimeout(() => {
-      ind.classList.remove('active');
-      txt.textContent = 'Date salvate în browser';
-    }, 1800);
-  }
-}
-
-function loadAuthData() {
-  [...LOGIN_FIELDS, ...SIGNUP_FIELDS].forEach(({ id, key }) => {
-    const el = document.getElementById(id);
-    const saved = localStorage.getItem(key);
-
-    if (el && saved) {
-      el.value = saved;
-      el.classList.add('has-value');
+/* Validare câmp */
+function validateAinp(el) {
+    var val = el.value.trim();
+    if (!val) { el.classList.remove("valid"); el.classList.add("invalid"); return false; }
+    if (el.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        el.classList.remove("valid"); el.classList.add("invalid"); return false;
     }
-  });
+    el.classList.remove("invalid"); el.classList.add("valid"); return true;
 }
 
-function initAuthFields(fields, indicatorId, textId) {
-  fields.forEach(({ id, key }) => {
-    const el = document.getElementById(id);
-    if (!el) return;
+/* Salvare localStorage + indicator */
+function saveAinp(key, value, siId, siTxtId) {
+    localStorage.setItem(key, value);
+    var ind = document.getElementById(siId);
+    var txt = document.getElementById(siTxtId);
+    if (!ind || !txt) return;
+    ind.classList.add("active");
+    txt.textContent = "✓ Salvat automat";
+    clearTimeout(window["_si_" + siId]);
+    window["_si_" + siId] = setTimeout(function() {
+        ind.classList.remove("active");
+        txt.textContent = "Date salvate în browser";
+    }, 1800);
+}
 
-    el.addEventListener('input', () => {
-      saveAuthField(key, el.value, indicatorId, textId);
-      validateAuthField(el);
-      el.classList.toggle('has-value', el.value.trim() !== '');
+/* Încarcă date din localStorage */
+function loadAuthData() {
+    AUTH_LOGIN_FIELDS.concat(AUTH_SIGNUP_FIELDS).forEach(function(f) {
+        var el = document.getElementById(f.id);
+        var saved = localStorage.getItem(f.key);
+        if (el && saved) { el.value = saved; el.classList.add("has-val"); }
     });
-
-    el.addEventListener('blur', () => validateAuthField(el));
-    el.addEventListener('focus', () => el.classList.add('focused'));
-    el.addEventListener('blur', () => el.classList.remove('focused'));
-  });
 }
 
-function saveUserToJson(user) {
-  fetch("http://localhost:3000/save-user", {
+/* Atașează events pe câmpuri */
+function initAuthInputs(fields, siId, siTxtId) {
+    fields.forEach(function(f) {
+        var el = document.getElementById(f.id);
+        if (!el) return;
+        el.addEventListener("input", function() {
+            saveAinp(f.key, el.value, siId, siTxtId);
+            validateAinp(el);
+            el.classList.toggle("has-val", el.value.trim() !== "");
+        });
+        el.addEventListener("blur", function() { validateAinp(el); });
+    });
+}
+
+/* Afișează success state */
+function showAuthSuccess(name, email, msg) {
+    document.getElementById("auth-login").classList.add("hidden");
+    document.getElementById("auth-signup").classList.add("hidden");
+    document.getElementById("auth-success").classList.remove("hidden");
+    document.querySelectorAll(".auth-tab").forEach(function(t) { t.style.display = "none"; });
+
+    document.getElementById("auth-success-title").textContent = msg || "Autentificat!";
+    document.getElementById("auth-success-msg").textContent = "Bine ai venit, " + name + "!";
+
+    var badge = document.getElementById("auth-user-badge");
+    badge.innerHTML =
+        '<div class="auth-user-av">' + name.charAt(0).toUpperCase() + "</div>" +
+        '<div><div class="auth-user-name">' + name + "</div>" +
+        '<div class="auth-user-email">' + email + "</div></div>";
+}
+
+/* Verifică dacă e logat */
+function checkAuthLoggedIn() {
+    var user = JSON.parse(localStorage.getItem("musik_user") || "null");
+    if (user) showAuthSuccess(user.name, user.email, "Bine ai revenit!");
+}
+
+/* LOGIN */
+function doLogin(btn) {
+    var nameEl  = document.getElementById("l-name");
+    var emailEl = document.getElementById("l-email");
+    var passEl  = document.getElementById("l-pass");
+    var ok = true;
+    [nameEl, emailEl, passEl].forEach(function(el) { if (!validateAinp(el)) ok = false; });
+
+    if (!ok) { btn.classList.add("shake"); setTimeout(function() { btn.classList.remove("shake"); }, 500); return; }
+
+    var accounts = JSON.parse(localStorage.getItem("musik_accounts") || "[]");
+    var found = null;
+    accounts.forEach(function(a) { if (a.email === emailEl.value.trim() && a.pass === passEl.value) found = a; });
+
+    if (!found && accounts.length > 0) {
+        btn.classList.add("err"); btn.textContent = "✗ Date incorecte";
+        passEl.classList.add("invalid");
+        setTimeout(function() { btn.classList.remove("err"); btn.textContent = "Login"; }, 2200);
+        return;
+    }
+
+    btn.classList.add("sending"); btn.textContent = "Se autentifică...";
+    setTimeout(function() {
+        var user = found || { name: nameEl.value.trim(), email: emailEl.value.trim() };
+        localStorage.setItem("musik_user", JSON.stringify(user));
+        btn.classList.remove("sending"); btn.classList.add("sent"); btn.textContent = "✓ Succes!";
+        setTimeout(function() { showAuthSuccess(user.name, user.email); }, 550);
+    }, 1000);
+}
+
+/* SIGN UP */
+function doSignup(btn) {
+    var nameEl  = document.getElementById("s-name");
+    var emailEl = document.getElementById("s-email");
+    var passEl  = document.getElementById("s-pass");
+    var pass2El = document.getElementById("s-pass2");
+    var ok = true;
+    [nameEl, emailEl, passEl, pass2El].forEach(function(el) { if (!validateAinp(el)) ok = false; });
+
+    if (passEl.value !== pass2El.value) {
+        pass2El.classList.add("invalid");
+        btn.classList.add("err", "shake");
+        var orig = btn.textContent; btn.textContent = "✗ Parolele nu coincid!";
+        setTimeout(function() { btn.classList.remove("err", "shake"); btn.textContent = orig; }, 2200);
+        return;
+    }
+
+    if (!ok) { btn.classList.add("shake"); setTimeout(function() { btn.classList.remove("shake"); }, 500); return; }
+
+    btn.classList.add("sending"); btn.textContent = "Se creează contul...";
+    setTimeout(function() {
+        var user = { name: nameEl.value.trim(), email: emailEl.value.trim(), pass: passEl.value };
+        var accounts = JSON.parse(localStorage.getItem("musik_accounts") || "[]");
+        accounts.push(user); localStorage.setItem("musik_accounts", JSON.stringify(accounts));
+        localStorage.setItem("musik_user", JSON.stringify(user));
+
+        fetch("/save-user", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+        "Content-Type": "application/json"
     },
     body: JSON.stringify(user)
-  })
-  .then(res => res.json())
-  .then(data => console.log(data.message))
-  .catch(err => console.log("Serverul nu este pornit sau Node.js nu este instalat:", err));
-}
-
-function checkLoggedIn() {
-  const user = JSON.parse(localStorage.getItem('musik_user') || 'null');
-
-  if (user) {
-    showSuccess(user.name, user.email, false);
-  }
-}
-
-function showSuccess(name, email, animate = true) {
-  document.getElementById('tab-login').classList.add('hidden');
-  document.getElementById('tab-signup').classList.add('hidden');
-  document.getElementById('tab-success').classList.remove('hidden');
-
-  const title = document.getElementById('success-title');
-  const msg = document.getElementById('success-msg');
-  const tabs = document.querySelector('.auth-tabs');
-
-  const existing = document.getElementById('user-badge');
-  if (existing) existing.remove();
-
-  const badge = document.createElement('div');
-  badge.id = 'user-badge';
-  badge.className = 'user-badge';
-
-  badge.innerHTML = `
-    <div class="user-avatar">${name.charAt(0).toUpperCase()}</div>
-    <div>
-      <div class="user-info-name">${name}</div>
-      <div class="user-info-email">${email}</div>
-    </div>
-  `;
-
-  document.getElementById('tab-success').insertBefore(
-    badge,
-    document.getElementById('tab-success').firstChild
-  );
-
-  title.textContent = animate ? 'Autentificat cu succes!' : 'Bine ai revenit!';
-  msg.textContent = 'Bine ai venit în comunitatea Musik, ' + name + '!';
-
-  if (tabs) tabs.style.display = 'none';
-}
-
-function handleLogin(btn) {
-  const nameEl = document.getElementById('l-name');
-  const emailEl = document.getElementById('l-email');
-  const phoneEl = document.getElementById('l-phone');
-  const passEl = document.getElementById('l-pass');
-
-  let ok = true;
-
-  [nameEl, emailEl, phoneEl, passEl].forEach(el => {
-    if (!validateAuthField(el)) ok = false;
-  });
-
-  if (!ok) {
-    btn.classList.add('shake');
-    setTimeout(() => btn.classList.remove('shake'), 500);
-    return;
-  }
-
-  const accounts = JSON.parse(localStorage.getItem('musik_accounts') || '[]');
-
-  const found = accounts.find(a =>
-    a.email === emailEl.value.trim() &&
-    a.pass === passEl.value
-  );
-
-  if (!found && accounts.length > 0) {
-    btn.classList.add('error');
-    btn.textContent = '✗ Email sau parolă greșită';
-    passEl.classList.add('invalid');
-
-    setTimeout(() => {
-      btn.classList.remove('error');
-      btn.textContent = 'Login';
-    }, 2000);
-
-    return;
-  }
-
-  btn.classList.add('sending');
-  btn.textContent = 'Se autentifică...';
-
-  setTimeout(() => {
-    const user = found || {
-      name: nameEl.value.trim(),
-      email: emailEl.value.trim(),
-      phone: phoneEl.value.trim()
-    };
-
-    localStorage.setItem('musik_user', JSON.stringify(user));
-
-    btn.classList.remove('sending');
-    btn.classList.add('sent');
-    btn.textContent = '✓ Succes!';
-
-    setTimeout(() => showSuccess(user.name, user.email), 500);
-  }, 1000);
-}
-
-function handleSignup(btn) {
-  const nameEl = document.getElementById('s-name');
-  const emailEl = document.getElementById('s-email');
-  const phoneEl = document.getElementById('s-phone');
-  const passEl = document.getElementById('s-pass');
-  const pass2El = document.getElementById('s-pass2');
-
-  let ok = true;
-
-  [nameEl, emailEl, phoneEl, passEl, pass2El].forEach(el => {
-    if (!validateAuthField(el)) ok = false;
-  });
-
-  if (passEl.value !== pass2El.value) {
-    setInvalid(pass2El);
-
-    btn.classList.add('shake');
-    btn.classList.add('error');
-    btn.textContent = '✗ Parolele nu coincid!';
-
-    setTimeout(() => {
-      btn.classList.remove('shake', 'error');
-      btn.textContent = 'Creează Cont';
-    }, 2000);
-
-    return;
-  }
-
-  if (!ok) {
-    btn.classList.add('shake');
-    setTimeout(() => btn.classList.remove('shake'), 500);
-    return;
-  }
-
-  btn.classList.add('sending');
-  btn.textContent = 'Se creează contul...';
-
-  setTimeout(() => {
-    const user = {
-      name: nameEl.value.trim(),
-      email: emailEl.value.trim(),
-      phone: phoneEl.value.trim(),
-      pass: passEl.value
-    };
-
-    const accounts = JSON.parse(localStorage.getItem('musik_accounts') || '[]');
-    accounts.push(user);
-
-    localStorage.setItem('musik_accounts', JSON.stringify(accounts));
-    localStorage.setItem('musik_user', JSON.stringify(user));
-
-    saveUserToJson(user);
-
-    [...SIGNUP_FIELDS, { id: 's-pass' }, { id: 's-pass2' }].forEach(({ id, key }) => {
-      const el = document.getElementById(id);
-
-      if (el) {
-        el.value = '';
-        el.classList.remove('valid', 'invalid', 'has-value');
-      }
-
-      if (key) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    btn.classList.remove('sending');
-    btn.classList.add('sent');
-    btn.textContent = '✓ Cont creat!';
-
-    setTimeout(() => showSuccess(user.name, user.email), 500);
-  }, 1200);
-}
-
-function logout() {
-  localStorage.removeItem('musik_user');
-
-  const tabs = document.querySelector('.auth-tabs');
-  if (tabs) tabs.style.display = 'flex';
-
-  switchTab('login', document.querySelector('.auth-tab'));
-
-  const badge = document.getElementById('user-badge');
-  if (badge) badge.remove();
-
-  document.getElementById('tab-success').classList.add('hidden');
-  document.getElementById('tab-login').classList.remove('hidden');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadAuthData();
-  initAuthFields(LOGIN_FIELDS, 'save-indicator-login', 'save-text-login');
-  initAuthFields(SIGNUP_FIELDS, 'save-indicator-signup', 'save-text-signup');
-  checkLoggedIn();
+})
+.then(function(response) {
+    return response.json();
+})
+.then(function(data) {
+    console.log("Trimis la server:", data);
+})
+.catch(function(error) {
+    console.log("Eroare la salvare:", error);
 });
 
+        AUTH_SIGNUP_FIELDS.forEach(function(f) {
+            var el = document.getElementById(f.id);
+            if (el) { el.value = ""; el.classList.remove("valid","invalid","has-val"); }
+            localStorage.removeItem(f.key);
+        });
+        ["s-pass","s-pass2"].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.value = "";
+        });
+
+        btn.classList.remove("sending"); btn.classList.add("sent"); btn.textContent = "✓ Cont creat!";
+        setTimeout(function() { showAuthSuccess(user.name, user.email, "Cont creat cu succes!"); }, 550);
+    }, 1200);
+}
+
+/* LOGOUT */
+function doLogout() {
+    localStorage.removeItem("musik_user");
+    document.getElementById("auth-success").classList.add("hidden");
+    document.querySelectorAll(".auth-tab").forEach(function(t) { t.style.display = ""; });
+    var btnL = document.getElementById("btn-login");
+    var btnS = document.getElementById("btn-signup");
+    if (btnL) { btnL.className = "auth-btn"; btnL.textContent = "Login"; }
+    if (btnS) { btnS.className = "auth-btn"; btnS.textContent = "Creează Cont"; }
+    authSwitch("login", document.querySelector(".auth-tab"));
+}
+
+/* INIT */
+document.addEventListener("DOMContentLoaded", function() {
+    initAuthInputs(AUTH_LOGIN_FIELDS,  "si-login",  "si-login-txt");
+    initAuthInputs(AUTH_SIGNUP_FIELDS, "si-signup", "si-signup-txt");
+    loadAuthData();
+    checkAuthLoggedIn();
+});
