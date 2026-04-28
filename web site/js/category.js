@@ -126,8 +126,6 @@ function renderArtists() {
         const card = document.createElement("div");
         card.className = "artist-card";
 
-        const savedTicket = localStorage.getItem("selectedTicket");
-
         card.innerHTML = `
             <div class="artist-image">
                 <img src="${artist.img}" alt="${artist.name}">
@@ -136,8 +134,8 @@ function renderArtists() {
             <p class="artist-date">${artist.date}</p>
             <h3 class="artist-name">${artist.name}</h3>
 
-            <a href="#" class="buy-btn ${savedTicket === artist.name ? "selected" : ""}" data-name="${artist.name}">
-                ${savedTicket === artist.name ? "Bilet selectat" : "Cumpără bilet"}
+            <a href="#" class="buy-btn" data-name="${artist.name}">
+                Cumpără bilet
             </a>
         `;
 
@@ -147,20 +145,40 @@ function renderArtists() {
 
 renderArtists();
 
-document.addEventListener("click", function(event) {
-    if (event.target.classList.contains("buy-btn")) {
-        event.preventDefault();
+/* TOAST SUCCES */
+function showToast() {
+    const toast = document.getElementById("successToast");
+    if (!toast) return;
 
-        const artistName = event.target.dataset.name;
+    toast.classList.add("show");
 
-        localStorage.setItem("selectedTicket", artistName);
+    setTimeout(function() {
+        toast.classList.remove("show");
+    }, 2000);
+}
 
-        document.querySelectorAll(".buy-btn").forEach(function(button) {
-            button.classList.remove("selected");
-            button.textContent = "Cumpără bilet";
-        });
+/* CLICK GLOBAL */
+document.addEventListener("click", function(e) {
 
-        event.target.classList.add("selected");
-        event.target.textContent = "Bilet selectat";
+    // deschide modal
+    if (e.target.classList.contains("buy-btn")) {
+        e.preventDefault();
+        document.getElementById("ticketModal").classList.add("show");
+    }
+
+    // inchide modal
+    if (e.target.id === "ticketClose") {
+        document.getElementById("ticketModal").classList.remove("show");
+    }
+
+    // alegere bilet
+    if (e.target.classList.contains("choose-btn")) {
+        document.getElementById("ticketModal").classList.remove("show");
+        showToast();
+    }
+
+    // inchide la click pe fundal
+    if (e.target.id === "ticketModal") {
+        e.target.classList.remove("show");
     }
 });
