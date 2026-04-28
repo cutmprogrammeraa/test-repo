@@ -89,3 +89,9 @@
   },
   "homepage": "https://github.com/cutmprogrammeraa/test-repo#readme"
 }
+
+{
+  "scripts": {
+    "start": "node server.js"
+  }
+}

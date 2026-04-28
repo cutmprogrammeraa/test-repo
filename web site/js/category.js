@@ -3,22 +3,22 @@ const categoryData = {
         {
             name: "Carla’s Dreams",
             date: "6 - 7 aprilie 21:00 - 23:45",
-            img: "../images/carlas.jpg"
+            img: "../images/carlas.png"
         },
         {
             name: "Irina Rimes",
             date: "26 aprilie 20:00 - 21:45",
-            img: "../images/rimes.jpg"
+            img: "../images/rimes.png"
         },
         {
             name: "Ionel Istrati",
             date: "19 mai 16:00 - 19:00",
-            img: "../images/istrati.jpg"
+            img: "../images/istrati.png"
         },
         {
             name: "Cleopatra Stratan",
             date: "16 iunie 19:00 - 21:45",
-            img: "../images/stratan.jpg"
+            img: "../images/stratan.png"
         }
     ],
 
@@ -26,22 +26,22 @@ const categoryData = {
         {
             name: "Nicolae Botgros",
             date: "31 mai 14:00 - 17:20",
-            img: "images/folk-1.jpg"
+            img: "../images/botgros.png"
         },
         {
             name: "Zinaida Julea",
             date: "3 iulie 20:00 - 21:45",
-            img: "images/folk-2.jpg"
+            img: "../images/julea.png"
         },
         {
             name: "Ion Paladi",
             date: "12 iunie 20:30 - 22:30",
-            img: "images/folk-3.jpg"
+            img: "../images/paladi.png"
         },
         {
             name: "Igor Cuciuc",
             date: "29 iulie 19:00 - 21:45",
-            img: "images/folk-4.jpg"
+            img: "../images/cuciuc.png"
         }
     ],
 
@@ -49,68 +49,68 @@ const categoryData = {
         {
             name: "Vasike Iovu",
             date: "6 - 7 octombrie 19:00 - 20:45",
-            img: "images/instrumental-1.jpg"
+            img: "../images/iovu.png"
         },
         {
             name: "Constantin Moscovici",
             date: "5 august 20:00 - 21:45",
-            img: "images/instrumental-2.jpg"
+            img: "../images/moscovici.png"
         },
         {
             name: "Orchestra Fraților Advahov",
             date: "19 mai 15:00 - 17:00",
-            img: "images/instrumental-3.jpg"
+            img: "../images/advahov.png"
         },
         {
             name: "Corneliu Botgros",
             date: "6 septembrie 19:00 - 21:45",
-            img: "images/instrumental-4.jpg"
+            img: "../images/corneliub.png"
         }
     ],
 
     rock: [
         {
-            name: "Nervi",
+            name: "Nervy",
             date: "6 - 7 aprilie 21:00 - 23:45",
-            img: "images/rock-1.jpg"
+            img: "../images/nervy.png"
         },
         {
             name: "Zdob și Zdub",
             date: "26 aprilie 20:00 - 21:45",
-            img: "images/rock-2.jpg"
+            img: "../images/zdob.png"
         },
         {
             name: "Lupii lui Calancea",
             date: "19 mai 16:00 - 19:00",
-            img: "images/rock-3.jpg"
+            img: "../images/lupii.png"
         },
         {
             name: "Sabaton",
             date: "16 iunie 19:00 - 21:45",
-            img: "images/rock-4.jpg"
+            img: "../images/sabaton.png"
         }
     ],
 
     jazz: [
         {
-            name: "Jazz Quartet",
+            name: "Jazz'n Chișinău",
             date: "8 iunie 19:00 - 21:00",
-            img: "images/jazz-1.jpg"
+            img: "../images/jazzchisinau.png"
         },
         {
-            name: "Blue Night Band",
+            name: "Cătălina Cara",
             date: "14 iunie 20:00 - 22:00",
-            img: "images/jazz-2.jpg"
+            img: "../images/catalina.png"
         },
         {
-            name: "Saxophone Live",
+            name: "Jazz Day",
             date: "21 iunie 18:30 - 20:30",
-            img: "images/jazz-3.jpg"
+            img: "../images/jazzday.png"
         },
         {
-            name: "Evening Jazz Club",
+            name: "Geta Burlacu",
             date: "30 iunie 20:00 - 22:30",
-            img: "images/jazz-4.jpg"
+            img: "../images/geta.png"
         }
     ]
 };

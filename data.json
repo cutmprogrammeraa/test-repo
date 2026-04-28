@@ -1,3 +1,10 @@
 {
-  "users": []
+  "users": [
+    {
+      "name": "Petru Rares",
+      "email": "rarpetru@gmail.com",
+      "telefon": "+373 14 253 647",
+      "pass": "87654321"
+    }
+  ]
 }
